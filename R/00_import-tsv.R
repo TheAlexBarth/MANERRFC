@@ -138,7 +138,7 @@ ggplot(wq_summer_sum) +
   geom_line(aes(x = moday, y = Sal, color = sample_site)) +
   facet_wrap(~year(wq_summer_sum$date)) + 
   theme_bw() +
-  labs(x = '', y = 'Salinity')
+  labs(x = '', y = 'Salinity', color = '')
 
 
 
