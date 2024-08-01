@@ -228,7 +228,7 @@ corr_plotter <- function(taxa, col, log = T, remzero = F) {
   return(p)
 }
 
-corr_plotter('Ciliophora', 'Chl', log = T, remzero = F)
+corr_plotter('Ciliophora', 'Chl', log = F, remzero = F)
 corr_plotter('Bacillariophyta', 'Sal', log = T, remzero = F)
 corr_plotter('Dinophyceae', 'Sal', log = T, remzero = F)
 

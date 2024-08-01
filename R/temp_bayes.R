@@ -19,7 +19,7 @@ library(broom)
 # \- Model def ----------
 
 all_data$chl_scaled <- scale(all_data$Chl)
-all_data$sal_scaled <- scale(all_data$Sal)
+all_data$sal_ scaled <- scale(all_data$Sal)
 
 chl_mod <- brm(
   chl_scaled ~ sal_scaled + sample_site + sample_site * sal_scaled,
@@ -132,6 +132,11 @@ just_diat <- all_data |>
 diat <- brm(
   bf(num_L ~ sal_scaled,
      hu ~ sal_scaled + scale(img_vol)),
+  prior = c(
+    set_prior('normal(0,1)', class = 'b', coef = 'sal_scaled', dpar = 'mu'),
+    set_prior('normal(0,1)', class = 'b', dpar = 'mu'),
+    set_prior('normal(0,1)', class = 'Intercept')
+  ),
   family = hurdle_lognormal(),
   data = just_diat,
   thin = 2,
@@ -157,10 +162,15 @@ diat_pred$Sal <- diat_pred$sal_scaled |>
 ggplot() +
   stat_lineribbon(data = diat_pred,
                   aes(x = Sal, y = log(.epred)),
-                  .width = 0.95, alpha = 0.4) +
+                  .width = 0.95, alpha = 0.4,
+                  color = 'purple', fill = 'purple', alpha = 0.5) +
+  geom_smooth(data = just_diat,
+              aes(x = Sal, y = log(num_L + 1)),
+              method = 'lm', color = 'black', fill = "grey",
+              alpha = 0.75) + 
   geom_point(data = just_diat,
-             aes(x = Sal, y = log(num_L))) +
-  labs(x = 'Salinity', y = '#/L', fill = "") +
+             aes(x = Sal, y = log(num_L + 1))) +
+  labs(x = 'Salinity', y = 'Ln(Density) #/L', fill = "") +
   theme_bw()
 
 ## \-\- Just mu model ----------------
@@ -168,7 +178,7 @@ ggplot() +
 
 ggplot() +
   stat_lineribbon(data = diat_pred,
-                  aes(x = Sal, y = mu),
+                  aes(x = Sal, y = log(exp(mu)+1)),
                   .width = 0.95, alpha = 0.4) +
   geom_point(data = just_diat,
              aes(x = Sal, y = log(num_L))) +
@@ -178,15 +188,16 @@ ggplot() +
 
 ## \-\- Detection model -----------------
 
+
+## \-\-\- Salinity ---------------
 diat_detect_pred <- make_prediction_data(just_diat,
                                          "sal_scaled")
 
 
-diat_detect_pred <- diat_detect_pred[rep(1:nrow(diat_detect_pred),6),] |> 
+diat_detect_pred <- diat_detect_pred[rep(1:nrow(diat_detect_pred)),] |> 
   as.data.frame()
 
-diat_detect_pred$img_vol <- rep(summary(as.vector(scale(just_diat$img_vol))),
-                                each = 1000)
+diat_detect_pred$img_vol <- mean(scale(just_diat$img_vol))
 
 names(diat_detect_pred) <- c('sal_scaled', 'img_vol')
 
@@ -197,22 +208,49 @@ diat_detect_pred$Sal <- unscale(diat_detect_pred$sal_scaled,
                                 mean(all_data$Sal, na.rm = T),
                                 sd(all_data$Sal, na.rm = T))
 
-# diat_detect_pred$img_vol <- unscale(diat_detect_pred$img_vol,
-#                                     mean(just_diat$img_vol, na.rm = T),
-#                                     sd(just_diat$img_vol, na.rm = T))
-
-
-diat_detect_pred$vol_size <- diat_detect_pred$img_vol |> 
-  as.character()
+diat_detect_pred$img_vol <- unscale(diat_detect_pred$img_vol,
+                                    mean(just_diat$img_vol, na.rm = T),
+                                    sd(just_diat$img_vol, na.rm = T))
 
 ggplot() +
   stat_lineribbon(data = diat_detect_pred,
-                  aes(x = Sal, y = plogis(1-hu), fill = vol_size),
+                  aes(x = Sal, y = 1-hu),
                   .width = 0.95, alpha = 0.4) +
   geom_point(data = just_diat,
              aes(x = Sal, y = as.numeric((num_L>0)))) +
   labs(x = 'Salinity', y = '#/L', fill = "") +
   theme_bw()
+
+
+## \-\-\- Img Vol ---------------------------
+
+just_diat$img_vol_s <- scale(just_diat$img_vol)
+img_vol_predict <- make_prediction_data(just_diat,
+                                        'img_vol_s')
+  
+img_vol_predict$sal_scaled <- mean(just_diat$sal_scaled, na.rm = T)
+
+names(img_vol_predict) <- c('sal_scaled', 'img_vol') |> 
+  rev()
+
+img_vol_predict <- img_vol_predict |> 
+  add_epred_draws(diat, ndraw = 300, dpar = T)
+
+
+img_vol_predict$img_vol <- unscale(img_vol_predict$img_vol,
+                                    mean(just_diat$img_vol, na.rm = T),
+                                    sd(just_diat$img_vol, na.rm = T))
+
+
+ggplot() +
+  stat_lineribbon(data = img_vol_predict,
+                  aes(x = img_vol, y = 1-hu),
+                  .width = 0.95, alpha = 0.4) +
+  geom_point(data = just_diat,
+             aes(x = img_vol, y = as.numeric((num_L>0)))) +
+  labs(x = 'Sampling Volum', y = '1-p', fill = "") +
+  theme_bw()
+
 
 
 # \- Dinos ------------------
@@ -251,6 +289,9 @@ ggplot() +
   stat_lineribbon(data = dinos_pred,
                   aes(x = Sal, y = log(.epred)),
                   .width = 0.95, alpha = 0.4) +
+  stat_smooth(data = just_dinos,
+              aes(x = Sal, y = log(num_L)),
+              method = 'lm')+
   geom_point(data = just_dinos,
              aes(x = Sal, y = log(num_L))) +
   labs(x = 'Salinity', y = '#/L', fill = "") +
