@@ -36,7 +36,9 @@ ggplot() +
                   .width = 0.95, alpha = 0.5) +
   geom_point(data = just_diat,
              aes(x = Sal, y = count)) +
-  theme_bw()
+  labs(x = 'Salinity', y = 'Diatom Count') +
+  theme_bw() +
+  theme(legend.position = 'none')
 
 
 
@@ -65,7 +67,7 @@ poff_plot
 ## \-\- Dinos --------
 
 dino_poff <- brm(
-    bf(count ~ sal_scaled + offset(log(img_vol)) + s_temp),
+    bf(count ~ sal_scaled + offset(log(img_vol))),
     prior = c(
       set_prior('normal(0,100)', class = 'Intercept'),
       set_prior('normal(0,1)', class = 'b')
@@ -79,13 +81,11 @@ dino_poff <- brm(
   )
 
 
-just_dinos$s_temp <- scale(just_dinos$Temp)
 poff_pred <- make_prediction_data(just_dinos,
-                                  c('s_temp',
-                                    'sal_scaled'))
+                                    'sal_scaled')
 
 poff_pred$img_vol <- mean(just_dinos$img_vol) 
-poff_pred$sal_scaled <- 0
+
 
 poff_pred <- poff_pred |> 
   add_epred_draws(dino_poff, ndraw = 400, dpar = T)
@@ -97,11 +97,13 @@ poff_pred$Sal <- unscale(poff_pred$sal_scaled,
 
 ggplot() +
   stat_lineribbon(data = poff_pred,
-                  aes(x = s_temp, y = .epred),
+                  aes(x = Sal, y = .epred),
                   .width = 0.95, alpha = 0.5) +
   geom_point(data = just_dinos,
-             aes(x = s_temp, y = count)) +
-  theme_bw()
+             aes(x = Sal, y = count)) exp+
+  labs(x = 'Salinity', y = 'Dinoflagellate Count') +
+  theme_bw() +
+  theme(legend.position = 'none')
 
 
 

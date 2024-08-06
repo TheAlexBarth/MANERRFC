@@ -19,7 +19,7 @@ library(broom)
 # \- Model def ----------
 
 all_data$chl_scaled <- scale(all_data$Chl)
-all_data$sal_ scaled <- scale(all_data$Sal)
+all_data$sal_scaled <- scale(all_data$Sal)
 
 chl_mod <- brm(
   chl_scaled ~ sal_scaled + sample_site + sample_site * sal_scaled,
