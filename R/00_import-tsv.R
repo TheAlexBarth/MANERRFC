@@ -15,8 +15,6 @@ library(tidyr)
 
 raw <- read_etx('./data/raw.tsv')
 nut <- readRDS('./data/01_swmp_nut.rds')
-wq <- readRDS('./data/01_swmp_wq.rds')
-wq$sample_site <- wq$StationCode |> substr(4,5) |> toupper()
 PDSI <- read.csv('./data/00_PDSI_South-texas.csv')
 
 ## |- Prelim formatting ---------
