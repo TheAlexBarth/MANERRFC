@@ -13,6 +13,8 @@ library(brms)
 library(tidybayes)
 library(emmeans)
 
+source('./R/utils.R')
+
 ## |- Read in data --------------
 
 raw <- read_etx('./data/raw.tsv')
@@ -130,10 +132,11 @@ diatom_pois <- brm(
   ),
   data = just_diat,
   family = poisson,
-  iter = 999,
+  iter = 2000,
   chains = 3,
   thin = 2,
-  cores = 4
+  warmup = 500,
+  cores = 10
 )
 
 diat_pred <- make_prediction_data(just_diat, 'sal_scaled')
@@ -151,16 +154,21 @@ ggplot() +
   .width = 0.95, alpha = 0.5) +
   geom_point(data = just_diat,
   aes(x = Sal, y = count)) +
-  labs(x = 'Salinity', y = 'Diatom Count') +
+  labs(x = 'Salinity', y = 'Log10(Diatom Count)') +
   scale_y_log10()+
   theme_bw() +
-  theme(legend.position = 'none')
+  theme(legend.position = 'none')+
+  theme(panel.grid = element_blank(), panel.background = element_blank(),
+  axis.title = element_text(size = 8), axis.text = element_text(size = 6))
+
+ggsave('./output/s01_diatom-salinity-pred.pdf', device = 'pdf',
+units = 'in', width = 1.5, height = 1.5, dpi= 500)
 
 # \- Ciliates -------------------
 
-just_diat <- all_data |> 
+just_ciliate <- all_data |> 
   ungroup() |> 
-  filter(taxa == 'Bacillariophyta')
+  filter(taxa == 'Ciliophora')
 
 ciliate_pois <- brm(
   bf(count ~ sal_scaled + offset(log(img_vol))),
@@ -168,30 +176,35 @@ ciliate_pois <- brm(
     set_prior('normal(0,100)', class = 'Intercept'),
     set_prior('normal(0,1)', class = 'b')
   ),
-  data = just_diat,
+  data = just_ciliate,
   family = poisson,
-  iter = 999,
+  iter = 2000,
   chains = 3,
   thin = 2,
-  cores = 4
+  warmup = 500,
+  cores = 10
 )
 
-diat_pred <- make_prediction_data(just_diat, 'sal_scaled')
+cili_pred <- make_prediction_data(just_ciliate, 'sal_scaled')
 
-diat_pred$img_vol <- mean(just_diat$img_vol)
+cili_pred$img_vol <- mean(just_diat$img_vol)
 
-diat_pred <- diat_pred |> add_epred_draws(ciliate_pois, ndraw = 400, dpar = T)
+cili_pred <- cili_pred |> add_epred_draws(ciliate_pois, ndraw = 400, dpar = T)
 
-diat_pred$Sal <- unscale(diat_pred$sal_scaled, mean(just_diat$Sal, na.rm = T), sd(just_diat$Sal, na.rm = T))
+cili_pred$Sal <- unscale(cili_pred$sal_scaled, mean(just_diat$Sal, na.rm = T), sd(just_diat$Sal, na.rm = T))
 
 
 ggplot() +
-  stat_lineribbon(data = diat_pred,
+  stat_lineribbon(data = cili_pred,
   aes(x = Sal, y = .epred),
   .width = 0.95, alpha = 0.5) +
-  geom_point(data = just_diat,
+  geom_point(data = just_ciliate,
   aes(x = Sal, y = count)) +
-  labs(x = 'Salinity', y = 'ciliate Count') +
+  labs(x = 'Salinity', y = 'Log10(Ciliate Count)') +
   scale_y_log10()+
   theme_bw() +
-  theme(legend.position = 'none')
+  theme(legend.position = 'none') +
+  theme(panel.grid = element_blank(), panel.background = element_blank(),
+axis.title = element_text(size = 8), axis.text = element_text(size = 6))
+ggsave('./output/s01_ciliate-salinity-pred.pdf', device = 'pdf',
+units = 'in', width = 1.5, height = 1.5, dpi= 500)

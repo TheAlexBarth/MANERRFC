@@ -7,7 +7,6 @@ rm(list = ls())
 library(ggplot2)
 library(sf)
 library(maps)
-library(mapdata)
 
 library(ggmap)
 library(ggplot2)
@@ -22,8 +21,8 @@ points_df <- data.frame(
   Longitude = c(-97.02870, -97.03440, -97.20090)
 )
 
-points_df <- points_df[order(points_df$Location,
-                            c('AB','CE','CW','MB','SC')),]
+# points_df <- points_df[order(points_df$Location,
+#                             c('AB','CE','CW','MB','SC')),]
 
 # Define the center and zoom level for your map
 center <- c(lon = mean(points_df$Longitude), lat = mean(points_df$Latitude))
@@ -41,7 +40,14 @@ sat_map <- ggmap(satellite_map) +
             hjust = 0, vjust = 1.5, color = "white", size = 3) +
   scale_color_manual(values = gg_cbb_col(5)) +
   labs(x = "", y = "") +
-  theme_minimal()
+  theme_minimal() +
+  theme(plot.background = element_blank()) + 
+  theme(panel.background = element_rect(fill='transparent'), #transparent panel bg
+        plot.background = element_rect(fill='transparent', color=NA),
+        legend.box.background = element_rect(fill='transparent',
+                                             linetype = 0),
+        panel.border = element_rect(fill = 'transparent', color = 'transparent'),
+      axis.text = element_text(size = 6))
 
 # # Convert the data frame to a simple feature object
 points_sf <- st_as_sf(points_df, coords = c("Longitude", "Latitude"), crs = 4326)
