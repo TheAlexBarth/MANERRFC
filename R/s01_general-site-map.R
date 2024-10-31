@@ -30,8 +30,9 @@ zoom <- 10
 
 # Get the satellite image from Google Maps
 # Requires registering an API key
-satellite_map <- get_googlemap(center = center, zoom = zoom, maptype = 'satellite')
-
+# satellite_map <- get_googlemap(center = center, zoom = zoom, maptype = 'satellite')
+# saveRDS(satellite_map, './data/s01_ggsatmap.rds' )
+satellite_map <- readRDS('./data/s01_ggsatmap.rds')
 # Create the plot
 sat_map <- ggmap(satellite_map) +
   geom_point(data = points_df, aes(x = Longitude, y = Latitude,
@@ -47,7 +48,7 @@ sat_map <- ggmap(satellite_map) +
         legend.box.background = element_rect(fill='transparent',
                                              linetype = 0),
         panel.border = element_rect(fill = 'transparent', color = 'transparent'),
-      axis.text = element_text(size = 6))
+      axis.text = element_text(size = 6), legend.position = 'none')
 
 # # Convert the data frame to a simple feature object
 points_sf <- st_as_sf(points_df, coords = c("Longitude", "Latitude"), crs = 4326)
@@ -84,6 +85,6 @@ ggsave('./output/03_study-site.pdf',
            xmin = -96.9, xmax = -96.6, ymin = 27.6, ymax = 27.9
          ),
        height = 3,
-       width = 3)
+       width = 2.5)
 
 # dev.off()
