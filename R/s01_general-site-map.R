@@ -41,7 +41,7 @@ sat_map <- ggmap(satellite_map) +
             hjust = 0, vjust = 1.5, color = "white", size = 3) +
   scale_color_manual(values = gg_cbb_col(5)) +
   labs(x = "", y = "") +
-  theme_minimal() +
+  theme_bw() +
   theme(plot.background = element_blank()) + 
   theme(panel.background = element_rect(fill='transparent'), #transparent panel bg
         plot.background = element_rect(fill='transparent', color=NA),
