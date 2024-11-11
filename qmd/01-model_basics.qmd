@@ -1,0 +1,38 @@
+---
+title: Basic Description of Models
+format:
+    pdf
+---
+
+# Background
+
+Data are collected from FlowCam images of
+
+# Approach 1:
+
+## Non-hierarchical Case
+
+## Hierarchical Case
+
+# Approach 2: Mixed Model
+
+If we acknowledge that our estimates of $y_{g,i}$ described previously are really a derived estimate of counts, $n$, and a count to biomass conversion. In many cases, this is a fixed value from some published study which is then multiplied by the observed counts. However, with the employment of imaging analyses to process our phytoplankton samples, we actually are gathering real data on at least the biovolume of each individual.
+
+So we can really describe $y_{g,t} = n_{g,t} \times b_{g,i} \times c_g$ where $n_{g,t}$ are the counts of the $g$ group of phytoplankton at time $t$. The biomass of group $g$ is defined as $b_{g,i}$ where $i$ is a subset of $t$ where $n_{g,t}$ \> 0 and $c_g$ is a constant from literature values.
+
+This approach may offer several advantages. First, by treating our occurrances as counts, it is possible to include 0s with the observations, rather than having to develop separate model. This is particularly useful in the case of variable sampling volume inherent to imaging studies (or a common net-tow) where the number of individuals counted may vary based on the sampling effort.
+
+Second, we can also explicitly model the variation around individual sizes in our second model. By doing this, we can expand the model to include effects which may influence the size of individual cells. Now we can ask how both the number and the size of different phytoplankton are influenced by environmental factors - which have different ecological implications.
+
+This approach logically matches the system more clearly. Really, the presence of observing a plankton should follow some count distribution. Then the size/biomass of individuals are more likely to follow a normal distribution. 
+
+In the first approach we have a lot of derived quantities then try to model the data but are forced to do weird things like a log-normal distribution.
+
+```{=latex}
+\begin{center}
+    \begin{tabular}{ c c c }
+        $\mu$ & text & text \\
+        next & next & text
+    \end{tabular}
+\end{center}
+```
