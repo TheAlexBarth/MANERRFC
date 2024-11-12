@@ -6,9 +6,44 @@ format:
 
 # Background
 
-Data are collected from FlowCam images of
+Data are collected from FlowCam images of microplankton from the Mission-Aransas Estuary. Samples range from 2014 to 2021 collected roughly every month at four stations. Images were initially segemented using FlowCam's VisualSpreadsheet (version ranged from 2.0 to 4.0) which provided collages of individual vignettes of particles. Single image files were then extracted using MorphoCut [will need to site and link code], which formats images to be individually processed in EcoTaxa. The vignettes of particles were sorted manually to create a learning set [note the total size later] which then was used to train and predict classifications for the other vignettes. Ultimately, all particles with ABD [check for later] greater than 20 microns were manually validated by a single expert and that is the data used here. [will need to reference ID guides]
 
-# Approach 1:
+In imaging, VisualSpreadsheet reports several metrics related to size including length and width, which were used to calculate biovolume of each individual. 
+
+$$
+mgCm^{-3} = \frac{mgC}{V}
+$$
+
+We can describe the biomass concentration for an individual
+
+It is of a primary interest for oceanographers and marine ecologists to describe changes in the biomass of different microplankton groups. Imaging tools like FlowCam offer a great advantage over traditional microscopy because they are providing more detail to the specific biovolume/biomass of individuals. Whereas typical estimates rely on converting count data to average biovolume to average biomass. Imaging data can at least skip the first conversion in that chain.
+
+However, there remains several challenges to anlayzing changes in biomass concentration. Primarily, observations of individual plankters can be largely zero-inflated. This challenge is not unique to imaging data as many ecological datasets can be skewed based on non-observations. However, the issue of non-observations is more prominent in imaging data becuase the sampling volume (volume imaged) often changes which can influence the number of non-observations.
+
+
+
+# Approach 0: Log-normal regression
+
+An initial approach may be to simply model the data using a log-normal distribuiton. This is typically the primary approach taken:
+
+$$
+\begin{align}
+    y_{g,i} &\sim LN(\mu_{g,i}, s^2)\\
+    \\
+    \mu_{g,i} &= \pmb{\beta_g X_i}\\
+    \\
+    \pmb{\beta_g} &\sim N(\pmb{\theta_g}, \sigma^2_g)\\
+    \pmb{\theta_g} &\sim N(0, \pmb{\tau^2})\\
+    \pmb{\tau} &\sim [\pmb{\tau}]
+\end{align}
+$$
+
+
+
+# Approach 1: Hurdle Model
+
+
+
 
 ## Non-hierarchical Case
 

@@ -1,0 +1,45 @@
+---
+title: Notes on Taxonomy
+---
+
+Anything which could not be reliably identified but was clearly living was labeled as "living". These should not be included in group-specific analyses but may be useful for total microplankton abundance or size-spectra analyses.
+
+# Microzooplankton
+
+## Ciliates:
+
+Ciliates were a frequent and dominant group of microzooplankton. Many of these belong to *Spirotrichea* and include both lorica and non-lorica forming cells. The EcoTaxa taxonomy does not match the most recent WORMS taxonomy. Labels from this taxonomy are as follow:
+
+Spirotrichea was used as synonmyous with Oliggotrichea, the order which encompases both Choreotrichia and Oligotrichia. In most cases it was too difficult to distinuish between the collared or circular oral formation in individuals distinguishing between these two groups.
+
+Choreotrichia was used to categorize Tintinnids with lorica. Although some classification schemes would have unloricated ciliates like *Strombinidium* included in Choreotrichia (WoRMS). Lower classifications of Tintinnids were made when available. 
+
+A frequently observed phenomena was empty lorica. These were labeled as Choreotrichia X and should not be included as living counts. However, they may be a useful index of Tintinnid abundance.
+
+Other non-Spirotrich ciliates which were readily identifiable were Litostomatids including *Mesodinium rubrum* and *Didinium spp.*. 
+
+## Animals:
+
+Metazoan microzooplankton included Rotifers, Polychaete larvae, and occasionally, some larger zooplankton including Copepod nauplii, Cladocerans, Bivalve veligers, and Cnidarian (or possibly Schyphazoan) planular larvae.
+
+## Unknown:
+
+A few unknown, but clearly some sort of heterotrophic ciliate or protist-like critters were categorized using EcoTaxa's temporary tags: T###. These are treated as Other Ciliates for analyses.
+
+# Dinoflagellates
+
+Due to the smaller sizes of dinoflagellates and intracate idenfication procedure, the idenfication of dinoflagellates was slightly more difficult. For sorting purposes, broader classifications were used. In EcoTaxa, unidentified athecate dinos were given the label *Gymnodiniales*, which likely encompases all these taxa. Unidentified thecate dinos were labeled *Gonyaulacales*, which again is likely inclusive but does omit those which may be *Scrippsiella spp.* or *Heterocapsa spp*.
+
+# Diatoms
+
+Many Diatom taxa are readily distinguishable. However, a large number of diatoms are simply identified as "centric" or "pennate". While these most likely are *Thalassiosira spp.* and various Nitzschioid-like cells respectively, it is not clear so a more broad taxonomic classification was given.
+
+# Cyanobacteria:
+Largely unobserved except a few instances
+
+# References:
+
+https://nordicmicroalgae.org/taxon
+https://www.inaturalist.org/guides/1633
+Horner book
+https://phytoplanktonguide.lumcon.edu
