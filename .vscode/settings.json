@@ -1,0 +1,5 @@
+{
+    "scm.diffDecorations": "gutter",
+    "editor.minimap.enabled": true,
+    "editor.minimap.autohide": true
+}
