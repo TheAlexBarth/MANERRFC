@@ -150,7 +150,7 @@ diat_pred$Sal <- unscale(diat_pred$sal_scaled, mean(just_diat$Sal, na.rm = T), s
 
 ggplot() +
   stat_lineribbon(data = diat_pred,
-  aes(x = Sal, y = .epred),
+  aes(x = Sal, y = exp(.epred + log(mean(img_vol)))),
   .width = 0.95, alpha = 0.5) +
   geom_point(data = just_diat,
   aes(x = Sal, y = count)) +
