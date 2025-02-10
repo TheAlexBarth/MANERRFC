@@ -1,3 +1,12 @@
+! Warning
+
+this is currently in a very messy state because
+I used this repo for a lot of quick plots. many scripts are redundant or broken up.
+
+will be fixed later.
+
+msac files were for meeting 0125
+
 # MANERRFC
 
 Processing of Mission Aransas NERR flowcam data

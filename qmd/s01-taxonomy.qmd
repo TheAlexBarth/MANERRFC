@@ -1,5 +1,7 @@
 ---
 title: Notes on Taxonomy
+output:
+    pdf
 ---
 
 Anything which could not be reliably identified but was clearly living was labeled as "living". These should not be included in group-specific analyses but may be useful for total microplankton abundance or size-spectra analyses.

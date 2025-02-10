@@ -1,0 +1,402 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\PassOptionsToPackage{dvipsnames,svgnames,x11names}{xcolor}
+%
+\documentclass[
+  letterpaper,
+  DIV=11,
+  numbers=noendperiod]{scrartcl}
+
+\usepackage{amsmath,amssymb}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else  
+    % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+% Make \paragraph and \subparagraph free-standing
+\makeatletter
+\ifx\paragraph\undefined\else
+  \let\oldparagraph\paragraph
+  \renewcommand{\paragraph}{
+    \@ifstar
+      \xxxParagraphStar
+      \xxxParagraphNoStar
+  }
+  \newcommand{\xxxParagraphStar}[1]{\oldparagraph*{#1}\mbox{}}
+  \newcommand{\xxxParagraphNoStar}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+  \let\oldsubparagraph\subparagraph
+  \renewcommand{\subparagraph}{
+    \@ifstar
+      \xxxSubParagraphStar
+      \xxxSubParagraphNoStar
+  }
+  \newcommand{\xxxSubParagraphStar}[1]{\oldsubparagraph*{#1}\mbox{}}
+  \newcommand{\xxxSubParagraphNoStar}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+\makeatother
+
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{241,243,245}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.40,0.45,0.13}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\BuiltInTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textit{#1}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textit{#1}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\ExtensionTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.28,0.35,0.67}{#1}}
+\newcommand{\ImportTok}[1]{\textcolor[rgb]{0.00,0.46,0.62}{#1}}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\RegionMarkerTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.07,0.07,0.07}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textit{#1}}}
+
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}\usepackage{longtable,booktabs,array}
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+
+\KOMAoption{captions}{tableheading}
+\makeatletter
+\@ifpackageloaded{caption}{}{\usepackage{caption}}
+\AtBeginDocument{%
+\ifdefined\contentsname
+  \renewcommand*\contentsname{Table of contents}
+\else
+  \newcommand\contentsname{Table of contents}
+\fi
+\ifdefined\listfigurename
+  \renewcommand*\listfigurename{List of Figures}
+\else
+  \newcommand\listfigurename{List of Figures}
+\fi
+\ifdefined\listtablename
+  \renewcommand*\listtablename{List of Tables}
+\else
+  \newcommand\listtablename{List of Tables}
+\fi
+\ifdefined\figurename
+  \renewcommand*\figurename{Figure}
+\else
+  \newcommand\figurename{Figure}
+\fi
+\ifdefined\tablename
+  \renewcommand*\tablename{Table}
+\else
+  \newcommand\tablename{Table}
+\fi
+}
+\@ifpackageloaded{float}{}{\usepackage{float}}
+\floatstyle{ruled}
+\@ifundefined{c@chapter}{\newfloat{codelisting}{h}{lop}}{\newfloat{codelisting}{h}{lop}[chapter]}
+\floatname{codelisting}{Listing}
+\newcommand*\listoflistings{\listof{codelisting}{List of Listings}}
+\makeatother
+\makeatletter
+\makeatother
+\makeatletter
+\@ifpackageloaded{caption}{}{\usepackage{caption}}
+\@ifpackageloaded{subcaption}{}{\usepackage{subcaption}}
+\makeatother
+
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+\usepackage{bookmark}
+
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same} % disable monospaced font for URLs
+\hypersetup{
+  pdftitle={Basic Description of Models},
+  colorlinks=true,
+  linkcolor={blue},
+  filecolor={Maroon},
+  citecolor={Blue},
+  urlcolor={Blue},
+  pdfcreator={LaTeX via pandoc}}
+
+
+\title{Basic Description of Models}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+
+
+\section{Background}\label{background}
+
+Data are collected from FlowCam images of microplankton from the
+Mission-Aransas Estuary. Samples range from 2014 to 2021 collected
+roughly every month at four stations. Images were initially segemented
+using FlowCam's VisualSpreadsheet (version ranged from 2.0 to 4.0) which
+provided collages of individual vignettes of particles. Single image
+files were then extracted using MorphoCut {[}will need to cite and link
+code{]}, which formats images to be individually processed in EcoTaxa.
+The vignettes of particles were sorted manually to create a learning set
+{[}note the total size later{]} which then was used to train and predict
+classifications for the other vignettes. Ultimately, all particles with
+ABD {[}check for later{]} greater than 20 microns were manually
+validated by a single expert and that is the data used here. {[}will
+need to reference ID guides{]}
+
+In imaging, VisualSpreadsheet reports several metrics related to size
+including length and width, which were used to calculate biovolume of
+each individual. The biovolume of each individual can then be multiplied
+to get a biomass (in carbon). The total biomass of any group of plankton
+per unit volume can then be calculated:
+
+\begin{align}
+mgCm^{-3} = \frac{mgC}{v}
+\end{align}
+
+In plankton ecology/biological oceanography this is what researchers are
+typically trying to report. Estimates of \(mgCm^{-3}\) are either done
+with microscopy or imaging but in either case, it involves converting
+counts to biovolume to biomass. Because the counts of individuals tend
+to have large amounts of zeros.
+
+There are several ways to approach this:
+
+\section{Approach 1: Log-normal
+regression}\label{approach-1-log-normal-regression}
+
+An initial approach may be to simply model the data using a log-normal
+distribution. This is typically the primary approach taken:
+
+\subsubsection{Basic Case:}\label{basic-case}
+
+Terms:
+
+\begin{itemize}
+\item
+  \(y\) - biomass concentration (calculated from data of biovolume /
+  measured volume)
+\item
+  \(i\) - the number of observations
+\item
+  \(\sigma\) - sampling error / noise
+\end{itemize}
+
+\begin{align}
+    \text{Data Model:}\\
+    log(y_i) &\sim N(\mu_i, \sigma^2)\\
+    \\
+    \text{Parameter Model:}\\
+    \mu_i &= X'\beta
+\end{align}
+
+\begin{align}
+    y_{g,i} &\sim LN(\mu_{g,i}, s^2)\\
+    \\
+    \mu_{g,i} &= \pmb{\beta_g X_i}\\
+    \\
+    \pmb{\beta_g} &\sim N(\pmb{\theta_g}, \sigma^2_g)\\
+    \pmb{\theta_g} &\sim N(0, \pmb{\tau^2})\\
+    \pmb{\tau} &\sim [\pmb{\tau}]
+\end{align}
+
+\$\$
+
+\section{Approach 1: Hurdle Model}\label{approach-1-hurdle-model}
+
+The 0's are an issue given that there are many instances of
+non-observation where biomass is zero (e.g.~\(y_{g,i} = 0\)) For this a
+hurdle model may be appropriate as we can separately model the occurance
+probability and Such as:
+
+\[
+\begin{align}
+    y_{i} \sim \ &\left\{ 
+        \begin{array}{l}
+            0; z_i = 0\\
+            d_i; z_i = 1
+        \end{array} \right.
+\end{align}
+\]
+
+Now there's two models which contribute to the observed biomass \(y_i\).
+First, we can model whether or not a given plankter is present based on
+\(z_i\)
+
+\begin{Shaded}
+\begin{Highlighting}[]
+
+\NormalTok{\textbackslash{}begin\{align\}}
+\NormalTok{    \&\textbackslash{}text\{Occurance Model:\}\textbackslash{}\textbackslash{}}
+\NormalTok{    z\_i \&\textbackslash{}sim Bern(\textbackslash{}pi\_i) \textbackslash{}\textbackslash{} }
+\NormalTok{    logit(\textbackslash{}pmb\{\textbackslash{}pi\}) \&= \textbackslash{}pmb\{X\}\textquotesingle{}\textbackslash{}pmb\{\textbackslash{}alpha\}\textbackslash{}\textbackslash{}}
+    
+\NormalTok{    \textbackslash{}pmb\{\textbackslash{}alpha\} \&\textbackslash{}sim [\textbackslash{}pmb\{\textbackslash{}alpha\}]}
+\NormalTok{\textbackslash{}end\{align\}}
+\end{Highlighting}
+\end{Shaded}
+
+Here, \(\pmb{\alpha}\) denotes the coefficient matrix for the effect of
+different environmental covariates.
+
+Then separately, we can model the expected biomass concentration, given
+that some plankton are observed (\(z_i = 1\))
+
+\$\$ \begin{align}
+    &\text{Biomass Model:}\\
+    d_i &\sim LN(\mu_i, \sigma^2) \\ 
+    \mu_i &= \pmb{X}'\pmb{\beta}\\
+    
+    \pmb{\beta} &\sim [\pmb{\beta}]
+\end{align} \$\$
+
+Here, I've written a general, non-hierarchical case. This approach was
+done in detail by Mutshinda et al.~2022, where they modelled the
+probability of \(Y_{s,t}\) for different species, \(s\) at times \(t\).
+I've rewritten their approach to be consistent with the notation I
+described above: \[
+\begin{align}
+    [y_{s,t}] = \left\{ 
+        \begin{array}{l}
+            (1 - \pi_{s,t})\\
+            \pi_{s,t} \cdot LN(\mu_{s,t}, \sigma^2_s) 
+        \end{array} \right.
+\end{align}
+\]
+
+In this approach, the biomass concentraiton is essentially modeled
+separately for each \(s\) species, which has it's own occurance
+probability, \(\pi_s\) and expected biomass concentration, \(\mu_s\).
+Yet conceivably, it is more appropriate to model similar taxonomic
+groups in a hierarchical structure with a group-level mean effect and
+species/genus level variation, as I described in approach 0.
+
+\section{Approach 2: Mixed Model}\label{approach-2-mixed-model}
+
+The problem with both approaches described above is that it doesn't
+really reflect the true system. Really, plankton occur in the water as
+counts - whole individuals. Then the biomass concentration is determined
+both by the number of individuals and the size of those individuals:
+
+\[
+y_i = n_i \cdot b_i
+\]
+
+Observations of the total biomass concentration \(\y_i\) can be modeled
+separately as factors contributing to abundance, \(n\) and factors
+contributing to the biomass of individuals \(b\).
+
+If we acknowledge that our estimates of \(y_{g,i}\) described previously
+are really a derived estimate of counts, \(n\), and a count to biomass
+conversion. In many cases, this is a fixed value from some published
+study which is then multiplied by the observed counts. However, with the
+employment of imaging analyses to process our phytoplankton samples, we
+actually are gathering real data on at least the biovolume of each
+individual.
+
+So we can really describe
+\(y_{g,t} = n_{g,t} \times b_{g,i} \times c_g\) where \(n_{g,t}\) are
+the counts of the \(g\) group of phytoplankton at time \(t\). The
+biomass of group \(g\) is defined as \(b_{g,i}\) where \(i\) is a subset
+of \(t\) where \(n_{g,t}\) \textgreater{} 0 and \(c_g\) is a constant
+from literature values.
+
+This approach may offer several advantages. First, by treating our
+occurrances as counts, it is possible to include 0s with the
+observations, rather than having to develop separate model. This is
+particularly useful in the case of variable sampling volume inherent to
+imaging studies (or a common net-tow) where the number of individuals
+counted may vary based on the sampling effort.
+
+Second, we can also explicitly model the variation around individual
+sizes in our second model. By doing this, we can expand the model to
+include effects which may influence the size of individual cells. Now we
+can ask how both the number and the size of different phytoplankton are
+influenced by environmental factors - which have different ecological
+implications.
+
+This approach logically matches the system more clearly. Really, the
+presence of observing a plankton should follow some count distribution.
+Then the size/biomass of individuals are more likely to follow a normal
+distribution.
+
+In the first approach we have a lot of derived quantities then try to
+model the data but are forced to do weird things like a log-normal
+distribution.
+
+
+
+
+\end{document}

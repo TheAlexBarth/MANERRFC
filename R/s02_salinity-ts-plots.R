@@ -15,7 +15,7 @@ wq <- readRDS('./data/01_swmp_wq.rds')
 wq$sample_site <- wq$StationCode |> substr(4,5) |> toupper()
 
 wq <- wq |> 
-  filter(sample_site %in% c('AB','CE','CW')) |> 
+  filter(sample_site %in% c('AB','CE','CW', 'SC')) |> 
   filter(DateTimeStamp < as.Date('2023-01-01'))
 
 wq$Date <- as.Date(wq$DateTimeStamp)
@@ -29,18 +29,82 @@ wq_daysum <- wq |>
             ChlFluor = mean(ChlFluor, na.rm = T))
 
 
+saveRDS(wq_daysum, './output/s02-temp-wq.rds')
+
 ###
 # Time Series Plot #####
 ###
 
-ggplot(wq_daysum) +
+ggplot(wq_daysum |> 
+    filter(sample_site %in% c('CE', 'CW')) |> 
+    group_by(Date) |> 
+    summarise(sal = mean(Sal))
+    ) +
   geom_line(
-    aes(x = Date, y = Sal, color = sample_site)
+    aes(x = Date, y = sal),
+    linewidth = 3, color = '#dbf6f6'
   ) + 
-  labs(x = "", y = "Salinity") +
+  labs(x = "", y = "") +
   scale_color_manual(values = gg_cbb_col(3)) + 
   theme_minimal() +
-  theme()
+  theme(
+    axis.text = element_text(size = 28, color = 'white'),
+    panel.grid = element_line(color = 'grey50'),
+    plot.background = element_rect(fill = 'transparent', color = 'transparent'),
+    panel.background = element_rect(fill = 'transparent')
+  )
+ggsave('./output/s02_sal-ts.pdf',
+height = 6, width = 22, units = 'in')
+  
+
+# region \- chlorophyll reg ------
+
+# ggplot(
+#   wq_daysum |> 
+#     filter(sample_site %in% c('CE', 'CW')) |> 
+#     group_by(Date) |> 
+#     summarise(chl = mean(ChlFluor), sal = mean(Sal))
+#   ) +
+#   geom_point(
+#     aes(
+#       x = sal,
+#       y = chl
+#     )
+#   ) +
+#   theme_minimal()
+
+
+# chl_mod <- lm(
+#   chl ~ sal,
+#   data =  wq_daysum |> 
+#     filter(sample_site %in% c('CE', 'CW')) |> 
+#     group_by(Date) |> 
+#     summarise(chl = mean(ChlFluor), sal = mean(Sal))
+# )
+
+
+
+# region \- chl ts 
+
+
+ggplot(wq_daysum |> 
+  filter(sample_site %in% c('CE', 'CW')) |> 
+  group_by(Date) |> 
+  summarise(chl = mean(ChlFluor))
+  ) +
+geom_line(
+  aes(x = Date, y = chl),
+  linewidth = 3, color = '#dbf6f6'
+) + 
+labs(x = "", y = "") +
+scale_color_manual(values = gg_cbb_col(3)) + 
+theme_minimal() +
+theme(
+  axis.text = element_text(size = 28, color = 'white'),
+  panel.grid = element_line(color = 'grey50'),
+  plot.background = element_rect(fill = 'transparent', color = 'transparent'),
+  panel.background = element_rect(fill = 'transparent')
+)
 
 
 ####
@@ -60,6 +124,27 @@ wq_moday <- wq |>
   summarize(
     sal = mean(Sal, na.rm = T),
     sd_sal = sd(Sal, na.rm = T)
+  )
+
+# MARK:
+
+ggplot(data = wq_moday |> 
+  filter(sample_site == 'SC' &
+    mo_day > as.Date("2000-06-01") & mo_day < as.Date("2000-11-01")
+  )) +
+  geom_line(
+    aes(
+      x = mo_day,
+      y = sal
+    )
+  ) +
+  geom_ribbon(
+    aes(
+      x = mo_day,
+      ymin = sal-sd_sal,
+      ymax = sal+sd_sal
+    ),
+    color = '#56565600', alpha = 0.25
   )
 
 
