@@ -84,6 +84,41 @@ diat_fit <- stan(
   data = diat_pois,
   chains = 4, iter = 5000, warmup = 500, cores = 14
 )
+
+# region \- alternative script ------------
+
+# be sure to add intercept to this model
+all_diat$t_max[which(is.na(all_diat$t_max))] <- mean(all_diat$t_max, na.rm = T)
+diat_alt <- list(
+  N_obs = nrow(all_diat),
+  N_mes = nrow(diat_indv),
+  N_groups = length(unique(all_diat$group)),
+  n = all_diat$count,
+  log_b = log(diat_indv$pgC),
+  K_count = 3,
+  K_bmass = 2,
+  img_vol = all_diat$img_vol/1000, # convert to L
+  X_count = cbind(
+    rep(1, nrow(all_diat)),
+    all_diat$sal,
+    all_diat$t_max
+  ),
+  X_bio = cbind(
+    rep(1, nrow(diat_indv)),
+    diat_indv$sal
+  ),
+  group_counts = as.numeric(all_diat$group),
+  group_bio = as.numeric(diat_indv$group)
+)
+
+
+diat_alt_fit <- stan(
+  file = './stan/gen-hierachical_mixture_model.stan',
+  data = diat_alt,
+  chains = 4, iter = 5000, warmup = 500, cores = 14
+)
+
+
 # region \- save -------------
 saveRDS(
   list(mod = diat_fit, data = all_diat, indv = diat_indv),
