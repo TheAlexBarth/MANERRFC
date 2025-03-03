@@ -220,7 +220,7 @@ post_predict <- function(posterior_draws, predict_data, formula, n_draws = NULL)
 
 # region \- predition summary
 # input a matrix of predition with columns as values, rows as draws
-summarize_pred <- function(mat, detailed = TRUE) {
+summarize_pred <- function(mat, detailed = TRUE, quantile = TRUE) {
   require(bayestestR)
   
   if(!detailed) {
@@ -230,7 +230,18 @@ summarize_pred <- function(mat, detailed = TRUE) {
       low = sapply(bounds, function(x) x$CI_Low[1]),
       high = sapply(bounds, function(x) x$CI_High[1])
     )
-    return(odf)
+  } else if(quantile){
+    qs = apply(mat, 2, quantile,probs = c(0.025,0.125,0.25,0.75,0.875,0.975))
+    odf <- data.frame(
+      median = apply(mat, 2, median),
+      mean = apply(mat, 2, mean),
+      low.50 = qs[3,],
+      high.50 = qs[4,],
+      low.75 = qs[2,],
+      high.75 = qs[5,],
+      low.95 = qs[1,],
+      high.95 = qs[6,]
+    )
   } else {
     bounds <- apply(mat, 2, bayestestR::hdi, ci = c(0.51,.75,.95))
     odf <- data.frame(
@@ -244,11 +255,11 @@ summarize_pred <- function(mat, detailed = TRUE) {
       high.95 = sapply(bounds, function(x) x$CI_high[3])
     )
   }
+  return(odf)
+
 }
 
-
-#' make posterior ribbon bars
-
+# region \- plot prediction ------------------
 
 geom_error_range <- function(x, df, color) {
   out <- list(
@@ -281,7 +292,7 @@ geom_error_range <- function(x, df, color) {
 }
 
 # region \- prediction list ---------
-summarize_list <- function(mat_list, sp_range = sal_pred){
+sum_list <- function(mat_list, sp_range = sal_pred){
   l = mat_list |> 
     lapply(summarize_pred) |> 
     lapply(
@@ -297,6 +308,28 @@ summarize_list <- function(mat_list, sp_range = sal_pred){
       high.75 = sum(high.75),
       low.95 = sum(low.95),
       high.95 = sum(high.95)
+    ) |> 
+    ungroup()
+  
+  return(l)
+}
+
+mean_list <- function(mat_list, sp_range = sal_pred){
+  l = mat_list |> 
+    lapply(summarize_pred) |> 
+    lapply(
+      function(x) mutate(x, sal = sp_range)
+    ) |> 
+    list_to_tib()|> 
+    group_by(sal) |> 
+    summarize(
+      mean = mean(mean),
+      low.50 = mean(low.50),
+      high.50 = mean(high.50),
+      low.75 = mean(low.75),
+      high.75 = mean(high.75),
+      low.95 = mean(low.95),
+      high.95 = mean(high.95)
     ) |> 
     ungroup()
   
