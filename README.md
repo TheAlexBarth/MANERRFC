@@ -1,11 +1,4 @@
-! Warning
-
-this is currently in a very messy state because
-I used this repo for a lot of quick plots. many scripts are redundant or broken up.
-
-will be fixed later.
-
-msac files were for meeting 0125
+! Warning This is an on-going project with incomplete analyses
 
 # MANERRFC
 
@@ -13,18 +6,20 @@ Processing of Mission Aransas NERR flowcam data
 
 # Getting started
 
-To work through these scripts, follow the numeric flow of the files for the R scripts. If a script is prefixed with a letter, it corresponds to what the script does. s = supplemental analysis, t = temporary analysis, u = utilites.
-
-Right now, most of the project is free-form/exploratory so the workflow isn't super clear
+To work through these scripts, follow the numeric flow of the files for the R scripts. Many of these are data generating and need not be ran multiple times. I try to write code to function as units - scripts should be able to be run from terminal.
 
 Data products correspond to the script which produced them.
 
-# R
+# R/
 
-t01: Data for processing the analysis of data from Copano Summers
+-   00: import ecotaxa data and inital formatting
+-   01: import environmental
+-   02: merge environmental to scales matching etx data
 
+# Stan/
 
-# Data
+A generalized stan script to support the mixture model.
 
-All data are stored in the data folder
+# Data/
 
+All data are stored in the data folder. Note there are some preexisting (non-numbered) data pieces. SWMP data came from pre-processed set of data exported from CDMO. PDSI data was downloaded from {INSERT?}
