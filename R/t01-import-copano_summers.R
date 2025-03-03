@@ -6,7 +6,7 @@ library(ggplot2)
 library(tidyr)
 
 
-## \- Read in data --------------
+# region \- Read in data --------------
 
 box_path <- '~/Library/CloudStorage/Box-Box/TGCRC Plankton Food Webs/Data/SWMP Flow Cam Data/Exported/MANERRFC-Copano_summers.tsv'
 raw <- read_etx(box_path)
@@ -16,21 +16,19 @@ nut$sample_site <- nut$StationCode |> substr(4,5) |> toupper()
 wq <- readRDS('./data/01_swmp_wq.rds')
 wq$sample_site <- wq$StationCode |> substr(4,5) |> toupper()
 
+#############################################
+# MARK: Etx Formatting ---------------
+#############################################
 
-# ##########################
 
-# # Ecotaxa Formating ##########################
 
-# ###########################
-
-# \-\- Name Formatting --------------------------------
-
-# filter to all living
+# regioon \- name formatting ---------------------
 
 names(raw)[which(names(raw) == 'annotation_hierarchy')] <- 'taxo_hierarchy'
 
 # These name vectors should be altered based on final data
 # this is good for the summer
+ 
 dinonames <- c(
   `Other_dino` = 'Dinophyceae',
   `Dinophysis` = 'Dinophysis',
@@ -65,31 +63,30 @@ diatom_names <- c(
   `Coscinodiscids` = 'Coscinodiscophytina'
 )
 
-microzoop_names <- c(
+loricated_ciliates <- c(
+  `Tintinnina` = 'Choreotrichia',
+  `Tintinnina` = 'Choreotrichia X'
+)
+
+nl_ciliates <- c(
   `Mesodinium` = 'Mesodinium rubrum',
   `Mesodinium` = 'Mesodinium',
   `Other_ciliate` = 'Ciliophora',
   `Other_ciliate` = 't001',
   `Other_ciliate` = 't002',
   `Didinium` = 'Didinium',
-  `Spirotrichea_NL` = 'Spirotrichea', #should catch all non-loricated spirotricea
-  `Tintinnina` = 'Choreotrichia',
-  `Acantharea` = 'Acantharea',
-  `Rotifera` = 'Rotifera',
-  `Other_metazoan` = 'Metazoa',
-  `Other_metazoan` = 'planula',
-  `dead_choreo` = 'Choreotrichia X'
+  `Spirotrichea_NL` = 'Spirotrichea' #should catch all non-loricated spirotricea
 )
 
 living <- raw |> 
-  names_keep(c('living','t001','t002'), keep_children = T)
+  names_keep(c('living'), keep_children = T)
 
 living$taxo_name <- living |> 
-  names_to(c(dinonames, diatom_names, microzoop_names, 'living', 'othertocheck'))
+  names_to(c(dinonames, diatom_names, loricated_ciliates, nl_ciliates, 'living'))
 
 
 
-## \-\- Messy formatting -------------------------------------------------------
+# region \-\- Messy formatting -------------------------------------------------------
 
 living$id <- living$sample_id
 living$sample_id <- living$acq_id
@@ -107,15 +104,40 @@ living$acq_vol_imaged <- living$acq_vol_imaged |>
 
 living$acq_dil_fact[is.na(living$acq_dil_fact)] <- 1
 
-## \-\- Biovolume Calcs ------------------------------------------------------
+# region \-\- Biovolume Calcs ------------------------------------------------------
 
-living$um3 <- calc_ellps_vol(living$raw_feret_max, living$raw_feret_min,1) # this is in cubic microns
+living$um3 <- (4/3) * pi * (living$abd_diameter/2)^3
+
+living$cmass <- NA
+# dinoflagellates
+living$cmass[which(
+  living$taxo_name %in% dinonames
+)] <- exp(-0.353) * living$um3[which(living$taxo_name %in% dinonames)]^0.864
+
+#little diatoms
+living$cmass[which(
+  living$taxo_name %in% diatom_names & living$um3 <3000
+)] <- exp(-0.541)*living$um3[which(living$taxo_name %in% diatom_names & living$um3 <3000)]^0.811
+
+#big diatoms
+living$cmass[which(
+  living$taxo_name %in% diatom_names & living$um3 >3000
+)] <- exp(-0.933)*living$um3[which(living$taxo_name %in% diatom_names & living$um3 >3000)]^0.881
+
+# loricated ciliates
+living$cmass[which(living$taxo_name %in% loricated_ciliates)] <- exp(-0.168)*living$um3[which(living$taxo_name %in% loricated_ciliates)]^0.841
+
+# non-loricated ciliates
+living$cmass[which(living$taxo_name %in% nl_ciliates)] <- exp(-0.639)*living$um3[which(living$taxo_name %in% nl_ciliates)]^0.984
+
+
+
+###########################
+# MARK: SUMMARIZE ---------------
+###########################
 
 living_count <- living |> 
   bin_taxa(zooscan = T, force_bins = T)
-
-living_bv <- living |> 
-  bin_taxa(zooscan = T, func_col = 'um3', func = sum, force_bins = T)
 
 
 names(living_count) <- c('acq_id', 'taxa', 'count')
@@ -145,40 +167,43 @@ micro_den <- micro_den |>
   )
 
 
-# final biovolume 
-names(living_bv) <- c('acq_id', 'taxa', 'um3')
 
-bv_den <- living_bv |> 
+# region \- cmass --------------
+
+living_cmass <- living |> 
+  bin_taxa(zooscan = T, func_col = 'cmass', func = sum, force_bins = T)
+
+names(living_cmass) <- c('acq_id', 'taxa', 'pgC')
+
+cmass_den <- living_cmass |> 
   left_join(
     living[, c('acq_id', 'acq_dil_fact', 'id', 'acq_vol_imaged')] |> 
       unique(),
     by = 'acq_id'
   )
 
-  bv_den$conv_bv <- bv_den$um3 / bv_den$acq_dil_fact
+cmass_den$conv_cmass <- cmass_den$pgC / cmass_den$acq_dil_fact
 
 # final counts
-bv_sum <- bv_den |> 
-  select(taxa, conv_bv, acq_vol_imaged, id) |> 
+cmass_sum <- cmass_den |> 
+  select(taxa, conv_cmass, acq_vol_imaged, id) |> 
   group_by(taxa, id) |> 
-  summarize(bv = sum(conv_bv), img_vol = sum(acq_vol_imaged))
+  summarize(pgC = sum(conv_cmass), img_vol = sum(acq_vol_imaged))
 
-bv_sum$bv_L <- (bv_sum$bv / bv_sum$img_vol) * (1000) #l
+cmass_sum$pgC_L <- (cmass_sum$pgC / cmass_sum$img_vol) * (1000) #l
 
 all_conc <- micro_den |> 
   left_join(
-    bv_sum |> 
-      select(id,taxa, um3 = bv, um3_L = bv_L),
+    cmass_sum |> 
+      select(id,taxa, pgC, pgC_L),
     by = c('id', 'taxa')
   ) |> 
   mutate(sample_id = paste(sample_site, date, sep = "_")) |> 
   ungroup()
 
-# ##########################
-
-# # Environmental Formating ##########################
-
-# ###########################
+########################################
+# MARK: Environmental Format --------
+########################################
 
 # averaging values
 
@@ -216,7 +241,7 @@ wq_sum <- wq |>
   mutate(sample_id = paste(sample_site, date, sep = '_')) |> 
   ungroup()
 
-# \- clean up data -------------------
+# region \- clean up data -------------------
 
 extreme_to_na <- function(vect, sd_away) {
   vect[which(is.infinite(vect))] <- NA
@@ -242,14 +267,9 @@ wq_sum <- wq_sum |>
 
 
 
-
-
-# #################################
-
-# # Final Format ################################
-
-# #################################
-
+###################################
+# MARK: Final Format --------------------
+###################################
 
 final_conc <- all_conc |> 
   left_join(
@@ -271,7 +291,7 @@ final_indv <- living |>
   select(
     taxo_name,
     taxo_hierarchy,
-    um3,
+    pgC = cmass,
     sample_id
   ) |> 
   left_join(
@@ -293,7 +313,7 @@ saveRDS(
   list(
     dino = dinonames,
     diatom = diatom_names,
-    mz = microzoop_names
+    mz = c(loricated_ciliates, nl_ciliates)
   ),
   './data/t01-taxa_names.RDS'
 )
