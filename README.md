@@ -15,6 +15,7 @@ Data products correspond to the script which produced them.
 -   00: import ecotaxa data and inital formatting
 -   01: import environmental
 -   02: merge environmental to scales matching etx data
+    -   This is really just to keep code clean down the line.
 
 # Stan/
 
