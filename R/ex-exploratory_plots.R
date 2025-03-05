@@ -5,6 +5,7 @@
 rm(list = ls())
 library(ggplot2)
 library(dplyr)
+library(lubridate)
 library(EcotaxaTools)
 
 
@@ -43,6 +44,7 @@ etx$conc |>
   full_ts_plotter()
 
 
+
 etx$conc |> 
   filter(taxa == 'Spirotrichea') |> 
   group_by(date, sample_site) |> 
@@ -53,7 +55,7 @@ etx$conc |>
 # region \- seasonality ------------
 seasonality_plot <- function(groups) {
   data = etx$conc |> 
-    filter(taxa %in% groups) |>
+    filter(taxa %in% groups & sample_site == 'CE') |>
     group_by(sample_site, date) |> 
     summarize(
       pgC_L = sum(pgC_L)
@@ -77,7 +79,7 @@ seasonality_plot <- function(groups) {
         x = month,
         ymax = mean_C + sd_C,
         ymin = ifelse(
-          (mean_C - sd_C) > 0, 
+          (mean_C - sd_C) > 0,
           (mean_C - sd_C),
           0
         ),
@@ -108,7 +110,9 @@ ggplot() +
   theme_minimal()
 
 etx$conc |> 
-  filter(taxa %in% c('Choreotrichia', 'Choreotrichia X'), sample_site %in% c("CE", "CW")) |> 
+  filter(taxa %in% c('Choreotrichia', 'Choreotrichia X'), 
+         sample_site %in% c("CE", "CW"),
+         month(yearmo) %in% c(06,07,08,09)) |> 
   group_by(sample_site, date) |> 
   summarize(
     pgC_L = sum(pgC_L),
