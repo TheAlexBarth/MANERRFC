@@ -5,13 +5,18 @@
 
 rm(list = ls())
 library(dplyr)
+library(lubridate)
+
 nut <- readRDS('./data/swmp_nut.rds')
 nut$sample_site <- nut$StationCode |> substr(4,5) |> toupper()
 wq <- readRDS('./data/swmp_wq.rds')
 wq$sample_site <- wq$StationCode |> substr(4,5) |> toupper()
 PDSI <- read.csv('./data/PDSI_South-texas.csv')
-wind <- read.csv('./data/MARCEMET_R.csv')
 
+wind <- read.csv('./data/MARCEMET_R.csv')
+wind <- wind |> mutate(
+  DateTimeStamp = mdy_hm(DateTimeStamp) |> format("%Y/%d/%m")
+)
 
 # averaging values
 

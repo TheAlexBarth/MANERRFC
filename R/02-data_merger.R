@@ -31,13 +31,13 @@ nut_yearmo <- environ$nut_avg |>
     across(c(P,NH4,N, CHLA_N), mean, na.rm = T)
   )
 
-# average to yhe yearmo for winds
+# average to the yearmo for winds
 wind_yearmo <- environ$wind_avg |>
   mutate(
     yearmo = paste(year(.data$date),month(.data$date),'01',sep = '-') |>
       as.Date()
   ) |>
-  group_by(yearmo) |>
+  group_by(yearmo, sample_site) |>
   summarize(
     across(c(windspeed), mean, na.rm = T)
   )
@@ -52,18 +52,21 @@ conc_mg <- etx$conc |>
   left_join(
     nut_yearmo,
     by = c('sample_site', 'yearmo')
+  ) |>
+  left_join(
+    wind_yearmo,
+    by = c('sample_site', 'yearmo')
   )
 
 #  curiousity plot
-# ggplot(conc_mg) +
-#   geom_point(
-#     aes(
-#       x = Chl,
-#       y = CHLA_N,
-#       color = sample_site
-#     )
-#   ) +
-#   geom_abline(slope = 1, intercept = 0)
+ ggplot(conc_mg) +
+   geom_point(
+     aes(
+       x = windspeed,
+       y = Chl
+     )
+   ) +
+   geom_abline(slope = 1, intercept = 0)
 
 
 # region \- merge living --------------
@@ -75,7 +78,11 @@ living <- etx$indv |>
   left_join(
     nut_yearmo,
     by = c('sample_site', 'yearmo')
-  )
+  ) |>
+   left_join(
+     wind_yearmo,
+     by = c('sample_site', 'yearmo')
+   )
 
 
 # tot_conc <- conc_mg |> 
@@ -90,23 +97,23 @@ living <- etx$indv |>
 #   ) |> 
 #   unique()
 
-# ggplot(conc_mg) +
-#   geom_point(
-#     aes(
-#       x = sal,
-#       y = Chl,
-#       color = sample_site
-#     )
-#   ) +
-#   geom_smooth(
-#     aes(
-#       x = sal,
-#       y = Chl,
-#       color = sample_site
-#     ),
-#     method = 'lm'
-#   )+
-#   theme_minimal()
+ ggplot(conc_mg) +
+   geom_point(
+     aes(
+       x = windspeed,
+       y = Chl,
+       color = sample_site
+     )
+   ) +
+   geom_smooth(
+     aes(
+       x = sal,
+       y = Chl,
+       color = sample_site
+     ),
+     method = 'lm'
+   )+
+   theme_minimal()
 
 saveRDS(
   list(
