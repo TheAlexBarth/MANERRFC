@@ -10,7 +10,7 @@ nut$sample_site <- nut$StationCode |> substr(4,5) |> toupper()
 wq <- readRDS('./data/swmp_wq.rds')
 wq$sample_site <- wq$StationCode |> substr(4,5) |> toupper()
 PDSI <- read.csv('./data/PDSI_South-texas.csv')
-
+wind <- read.csv('./data/MARCEMET_R.csv')
 
 
 # averaging values
@@ -28,6 +28,20 @@ nut_avg <- nut |>
   mutate(sample_id = paste(sample_site, date, sep = "_")) |> 
   ungroup()
 
+# average daily wind speed values 
+
+wind_avg <- wind |>
+  mutate(date = as.Date(DateTimeStamp)) |>
+  select(date, WSpd, MaxWSpd, TotPAR) |>
+  group_by(date) |>
+  summarize(
+    windspeed = mean(WSpd, na.rm = T),
+    max_windspeed = mean(MaxWSpd, na.rm = T),
+    TotalPAR = mean(TotPAR, na.rm = T)
+  ) |>
+  mutate(sample_id = paste(date)) |>
+  mutate(sample_site = 'CE') |>
+  ungroup()
 
 # water quality daily averages
 
@@ -47,6 +61,18 @@ wq_sum <- wq |>
           Chl_min = min(ChlFluor, na.rm = T)
           ) |> 
   mutate(sample_id = paste(sample_site, date, sep = '_')) |> 
+  ungroup()
+
+wind_sum <- wind |>
+  mutate(date = as.Date(DateTimeStamp)) |> 
+  group_by(date) |> 
+  summarize(
+    windspeed = mean(WSpd, na.rm = T),
+    windspeed_max = max(WSpd, na.rm = T),
+    windspeed_min = min(WSpd, na.rm = T),
+    
+  ) |> 
+  mutate(sample_id = paste(date)) |> 
   ungroup()
 
 # region \- clean up data -------------------
@@ -73,11 +99,15 @@ wq_sum <- wq_sum |>
     across(c(s_max, sal, DO, DO_min, Chl, Chl_max, Chl_min), ~ extreme_to_na(.,5))
   )
 
+
+
 saveRDS(
   list(
     nut_avg = nut_avg,
     wq_sum = wq_sum,
-    PDSI = PDSI
+    PDSI = PDSI,
+    wind_avg = wind_avg,
+    wind_sum = wind_sum
   ),
   './data/01-environ_clean.rds'
 )

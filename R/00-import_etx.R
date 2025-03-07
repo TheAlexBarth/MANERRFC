@@ -17,7 +17,7 @@ library(tidyr)
 
 # region \- read data ---------------------------
 # will need local adjustment
-path = '~/Library/CloudStorage/Box-Box/TGCRC Plankton Food Webs/Data/NERRFC'
+path = 'C:/Users/David Malcolm/Box/TGCRC Plankton Food Webs/Data/NERRFC'
 
 raw <- read_etx(paste0(path,'/temp_flowcam-full.tsv'))
 raw$sample_site <- raw$sample_site |> toupper()
@@ -30,13 +30,13 @@ raw <- raw |> filter(sample_id != 'AB_2011-03-08')
 # set to just focus on living
 names(raw)[which(names(raw) == 'annotation_hierarchy')] <- 'taxo_hierarchy' # adjust for package
 
-# IMPORTANT NOTE - CAN"T TO THIS
+# IMPORTANT NOTE - CAN'T DO THIS
 # IF NOT ALL RAW SAMPLES ARE IN FILTERED LIVING SAMPLE!!!!!
 # living <- raw |> 
 #   names_keep('living', keep_children = T) 
 # EASIER TO KEEP not-living and filter later
 
-# renmae to be more simple
+# rename to be more simple
 living <- raw
 living$id <- living$sample_id
 living$sample_id <- living$acq_id
@@ -98,11 +98,11 @@ nl_ciliates <- c(
 living$taxo_name <- living |>
   names_to(c(
     dinonames, diatom_names, loricated_ciliates, nl_ciliates,
-    'living', 'not-living', 'temporary'  #ultimately temporary should be removed
+    'living', 'not-living', 'temporary' #ultimately temporary should be removed
   ))
 
 # final check:
-# table(living$taxo_name) |> sort()
+ table(living$taxo_name) |> sort()
 
 # region \- date format ----------------------------
 living$date <- living$sample_date |> 
@@ -118,7 +118,7 @@ living$yearmo <- paste(year(living$date),
                         sep = '-') |> 
   as.Date(format = '%Y-%m-%d')
 
-#change vol ot numeric
+#change vol to numeric
 living$acq_vol_imaged <- living$acq_vol_imaged |> 
   sapply(function(x) gsub('ml', '',x)) |> 
   as.numeric()

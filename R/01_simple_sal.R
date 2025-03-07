@@ -17,9 +17,16 @@ source('./R/utils.R')
 
 ## |- Read in data --------------
 
-raw <- read_etx('./data/raw.tsv')
-wq <- readRDS('./data/01_swmp_wq.rds')
-wq$sample_site <- wq$StationCode |> substr(4,5) |> toupper()
+# will need local adjustment
+path = 'C:/Users/David Malcolm/Box/TGCRC Plankton Food Webs/Data/NERRFC'
+
+raw <- read_etx(paste0(path,'/temp_flowcam-full.tsv'))
+raw$sample_site <- raw$sample_site |> toupper()
+raw <- raw |> filter(sample_id != 'AB_2011-03-08')
+raw_CE <- raw |> filter(sample_site == 'CE')
+
+environ <- readRDS('./data/01-environ_clean.rds')
+environ$sample_site <- environ$StationCode |> substr(4,5) |> toupper()
 
 # |-|- Etx format ------------
 
@@ -29,7 +36,7 @@ names(raw)[which(names(raw) == 'annotation_hierarchy')] <- 'taxo_hierarchy'
 living <- raw |> 
   names_keep('living', keep_children = T) 
 
-# renmae to be more simple
+# rename to be more simple
 living$taxo_name <- names_to(living, 
                              c('Cyanobacteria', 'Dinophyceae', 'Bacillariophyta',
                                'Euglenozoa','nauplii','Rotifera', 'heterotroph',
@@ -49,14 +56,14 @@ living$yearmo <- paste(year(living$date),
                         sep = '-') |> 
   as.Date(format = '%Y-%m-%d')
 
-#change vol ot numeric
+#change vol to numeric
 living$acq_vol_imaged <- living$acq_vol_imaged |> 
   sapply(function(x) gsub('ml', '',x)) |> 
   as.numeric()
 
 living$acq_dil_fact[is.na(living$acq_dil_fact)] <- 1
 
-## |-|-|- Density Calcs ---------------
+## |-|-|- Density Calculations ---------------
 
 living$id <- living$sample_id
 living$sample_id <- living$acq_id
@@ -90,8 +97,16 @@ micro_den <- micro_den |>
 
 # \- Join to Environmental
 
-wq_summers <- wq |> 
-  filter(substr(wq$StationCode, 4,5) %in% c('ce','cw')) |> 
+environ_nut_allsite_summers <- environ$nut_avg |> 
+  filter(environ$nut_avg$sample_site) %in% c('CE','CW','AB','SC') |> 
+  filter(month %in% c(6:9) & year %in% c(2014:2021))
+
+environ_wq_allsite_summers <- environ$wq_sum |> 
+  filter(environ$wq_sum$sample_site) %in% c('CE','CW','AB','SC') |> 
+  filter(month %in% c(6:9) & year %in% c(2014:2021))
+
+environ_wind_allsite_summers <- environ$wind_avg |> 
+  filter(environ$wind_avg$sample_site) %in% c('CE','CW','AB','SC') |> 
   filter(month %in% c(6:9) & year %in% c(2014:2021))
 
 wq_summer_sum <- wq_summers |> 

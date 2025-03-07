@@ -31,6 +31,17 @@ nut_yearmo <- environ$nut_avg |>
     across(c(P,NH4,N, CHLA_N), mean, na.rm = T)
   )
 
+# average to yhe yearmo for winds
+wind_yearmo <- environ$wind_avg |>
+  mutate(
+    yearmo = paste(year(.data$date),month(.data$date),'01',sep = '-') |>
+      as.Date()
+  ) |>
+  group_by(yearmo) |>
+  summarize(
+    across(c(windspeed), mean, na.rm = T)
+  )
+
 # region \- merge conc ----------
 
 conc_mg <- etx$conc |> 
@@ -43,7 +54,7 @@ conc_mg <- etx$conc |>
     by = c('sample_site', 'yearmo')
   )
 
-# # curiousity plot
+#  curiousity plot
 # ggplot(conc_mg) +
 #   geom_point(
 #     aes(
