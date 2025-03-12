@@ -2,6 +2,7 @@
 # Data merger -----------
 #########################
 rm(list = ls())
+library(tidyverse)
 library(dplyr)
 library(lubridate)
 
@@ -43,8 +44,64 @@ wind_yearmo <- environ$wind_avg |>
   )
 
 # region \- merge conc ----------
+diatom <- etx$diatom_conc 
+
+dino <- etx$dino_conc
+
+cili <- etx$ciliate_conc
+
+
+#attach variates to each concentration. Start with All
 
 conc_mg <- etx$conc |> 
+  left_join(
+    wq_yearmo,
+    by = c('sample_site', 'yearmo')
+  ) |> 
+  left_join(
+    nut_yearmo,
+    by = c('sample_site', 'yearmo')
+  ) |>
+  left_join(
+    wind_yearmo,
+    by = c('sample_site', 'yearmo')
+  )
+
+#Continue with diatoms
+
+diatom_mg <- diatom |>
+  left_join(
+    wq_yearmo,
+    by = c('sample_site', 'yearmo')
+  ) |> 
+  left_join(
+    nut_yearmo,
+    by = c('sample_site', 'yearmo')
+  ) |>
+  left_join(
+    wind_yearmo,
+    by = c('sample_site', 'yearmo')
+  )
+
+#Continue with dinoflagellates
+
+dino_mg <- dino |>
+  left_join(
+    wq_yearmo,
+    by = c('sample_site', 'yearmo')
+  ) |> 
+  left_join(
+    nut_yearmo,
+    by = c('sample_site', 'yearmo')
+  ) |>
+  left_join(
+    wind_yearmo,
+    by = c('sample_site', 'yearmo')
+  )
+
+#Continue with ciliates
+
+cili_mg <- cili |>
   left_join(
     wq_yearmo,
     by = c('sample_site', 'yearmo')
@@ -63,7 +120,7 @@ conc_mg <- etx$conc |>
    geom_point(
      aes(
        x = windspeed,
-       y = Chl
+       y = CHLA_N
      )
    ) +
    geom_abline(slope = 1, intercept = 0)
@@ -81,40 +138,113 @@ living <- etx$indv |>
   ) |>
    left_join(
      wind_yearmo,
-     by = c('sample_site', 'yearmo')
+     by = c('yearmo')
    )
 
 
-# tot_conc <- conc_mg |> 
-#   group_by(id,sample_site) |> 
-#   summarize(
-#     pgC_L = sum(pgC_L, na.rm = T)
-#   ) |> 
-#   left_join(
-#     conc_mg |> 
-#       select(id, t, Chl, sal),
-#     by = 'id'
-#   ) |> 
-#   unique()
+ tot_conc <- conc_mg |> 
+   group_by(id,sample_site) |> 
+   summarize(
+     pgC_L = sum(pgC_L, na.rm = T)
+   ) |> 
+   left_join(
+     conc_mg |> 
+       select(id, t, Chl, sal),
+     by = 'id'
+   ) |> 
+   unique()
+
 
  ggplot(conc_mg) +
    geom_point(
      aes(
        x = windspeed,
-       y = Chl,
+       y = CHLA_N,
        color = sample_site
      )
    ) +
    geom_smooth(
      aes(
-       x = sal,
-       y = Chl,
+       x = windspeed,
+       y = CHLA_N,
        color = sample_site
      ),
      method = 'lm'
    )+
    theme_minimal()
 
+ # Diatom biomass vs windspeed 
+ ggplot(diatom_mg) +
+   geom_point(
+     aes(
+       x = windspeed,
+       y = diatom_mg$pgC_L,
+       color = sample_site
+     )
+   ) +
+   geom_smooth(
+     aes(
+       x = windspeed,
+       y = diatom_mg$pgC_L,
+       color = sample_site
+     ),
+     method = 'lm'
+   )+ 
+   theme_minimal()
+   
+ 
+ # Diatom biomass vs salinity 
+ ggplot(diatom_mg) +
+   geom_point(
+     aes(
+       x = sal,
+       y = diatom_mg$pgC_L,
+       color = sample_site
+     )
+   ) +
+   geom_smooth(
+     aes(
+       x = sal,
+       y = diatom_mg$pgC_L,
+       color = sample_site
+     )
+   )
+ 
+ # Dinoflagellate biomass vs windspeed 
+ ggplot(dino_mg) +
+   geom_point(
+     aes(
+       x = windspeed,
+       y = dino_mg$pgC_L,
+       color = sample_site
+     )
+   ) +
+   geom_smooth(
+     aes(
+       x = windspeed,
+       y = dino_mg$pgC_L,
+       color = sample_site
+     )
+   )
+ 
+  
+ # Dinoflagellate biomass vs salinity 
+ ggplot(dino_mg) +
+   geom_point(
+     aes(
+       x = sal,
+       y = dino_mg$pgC_L,
+       color = sample_site
+     )
+   ) +
+   geom_smooth(
+     aes(
+       x = sal,
+       y = dino_mg$pgC_L,
+       color = sample_site
+     )
+   )
+ 
 saveRDS(
   list(
     names = etx$names,
