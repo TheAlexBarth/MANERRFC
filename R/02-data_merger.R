@@ -177,15 +177,15 @@ living <- etx$indv |>
  ggplot(diatom_mg) +
    geom_point(
      aes(
-       x = windspeed,
-       y = diatom_mg$pgC_L,
+       x = sal,
+       y = log(diatom_mg$pgC_L),
        color = sample_site
      )
    ) +
    geom_smooth(
      aes(
-       x = windspeed,
-       y = diatom_mg$pgC_L,
+       x = sal,
+       y = log(diatom_mg$pgC_L),
        color = sample_site
      ),
      method = 'lm'
