@@ -12,6 +12,16 @@ env <- readRDS('./data/01-environ_clean.RDS')
 
 
 env$PDSI$yearmo <- as.Date(env$PDSI$Date)
+
+## QUICK CREATE STATE:
+
+# choose to set based on pdsi index
+# env$PDSI$state = 'normal'
+# env$PDSI$state[env$PDSI$pdsi <= -2] <- 'dry' # index based on psdi and assign state.
+# env$PDSI$state[env$PDSI$pdsi > 0] <- 'wet'
+# add turbidity as well
+
+
 plank_pdsi <- etx$conc |> 
   filter(
     taxa %in% etx$names$diatom

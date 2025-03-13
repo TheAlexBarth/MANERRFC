@@ -45,7 +45,6 @@ wind_avg <- wind |>
     TotalPAR = mean(TotPAR, na.rm = T)
   ) |>
   mutate(sample_id = paste(date)) |>
-  mutate(sample_site = 'CE') |>
   ungroup()
 
 # water quality daily averages
@@ -66,18 +65,6 @@ wq_sum <- wq |>
           Chl_min = min(ChlFluor, na.rm = T)
           ) |> 
   mutate(sample_id = paste(sample_site, date, sep = '_')) |> 
-  ungroup()
-
-wind_sum <- wind |>
-  mutate(date = as.Date(DateTimeStamp)) |> 
-  group_by(date) |> 
-  summarize(
-    windspeed = mean(WSpd, na.rm = T),
-    windspeed_max = max(WSpd, na.rm = T),
-    windspeed_min = min(WSpd, na.rm = T),
-    
-  ) |> 
-  mutate(sample_id = paste(date)) |> 
   ungroup()
 
 # region \- clean up data -------------------
@@ -111,8 +98,7 @@ saveRDS(
     nut_avg = nut_avg,
     wq_sum = wq_sum,
     PDSI = PDSI,
-    wind_avg = wind_avg,
-    wind_sum = wind_sum
+    wind_avg = wind_avg
   ),
   './data/01-environ_clean.rds'
 )

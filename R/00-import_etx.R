@@ -17,7 +17,8 @@ library(tidyr)
 
 # region \- read data ---------------------------
 # will need local adjustment
-path = 'C:/Users/David Malcolm/Box/TGCRC Plankton Food Webs/Data/NERRFC'
+# path = 'C:/Users/David Malcolm/Box/TGCRC Plankton Food Webs/Data/NERRFC'
+path = '~/Library/CloudStorage/Box-Box/TGCRC Plankton Food Webs/Data/NERRFC'
 
 raw <- read_etx(paste0(path,'/temp_flowcam-full.tsv'))
 raw$sample_site <- raw$sample_site |> toupper()
@@ -224,14 +225,6 @@ all_conc <- micro_den |>
   mutate(sample_id = paste(sample_site, date, sep = "_")) |> 
   ungroup()
 
-diatom_conc <- all_conc |>
-  filter(all_conc$taxa %in% diatom_names)
-
-dino_conc <- all_conc |>
-  filter(all_conc$taxa %in% dinonames)
-
-ciliate_conc <- all_conc |> 
-  filter(all_conc$taxa %in% loricated_ciliates| all_conc$taxa %in% nl_ciliates)
 
 saveRDS(
   list(
@@ -241,9 +234,6 @@ saveRDS(
       mz = c(loricated_ciliates, nl_ciliates)
     ),
     conc = all_conc,
-    diatom_conc = diatom_conc,
-    dino_conc = dino_conc,
-    ciliate_conc = ciliate_conc,
     indv = living |> 
       filter(taxo_name %in% c(dinonames, diatom_names, loricated_ciliates, nl_ciliates))
   ),
