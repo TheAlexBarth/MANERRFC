@@ -19,7 +19,7 @@ wq_yearmo <- environ$wq_sum |>
   ) |> 
   group_by(yearmo, sample_site) |> 
   summarize(
-    across(c(t, t_max, t_min, s_max, sal, DO, DO_min, Chl, Chl_max, Chl_min), \(x) mean(x, na.rm = T))
+    across(c(t, t_max, t_min, s_max, sal, DO, DO_min, Chl, Chl_max, Chl_min, Turb), \(x) mean(x, na.rm = T))
   )
 
 # average to the yearmo for nuts
@@ -77,20 +77,20 @@ conc_mg <- etx$conc |>
 #    geom_abline(slope = 1, intercept = 0)
 
 
-# region \- merge living --------------
-living <- etx$indv |> 
-  left_join(
-    wq_yearmo,
-    by = c('sample_site', 'yearmo')
-  ) |> 
-  left_join(
-    nut_yearmo,
-    by = c('sample_site', 'yearmo')
-  ) |>
-   left_join(
-     wind_yearmo,
-     by = c('yearmo')
-   )
+# # region \- merge living --------------
+# living <- etx$indv |> 
+#   left_join(
+#     wq_yearmo,
+#     by = c('sample_site', 'yearmo')
+#   ) |> 
+#   left_join(
+#     nut_yearmo,
+#     by = c('sample_site', 'yearmo')
+#   ) |>
+#    left_join(
+#      wind_yearmo,
+#      by = c('yearmo')
+#    )
 
 
 #  tot_conc <- conc_mg |> 
@@ -111,7 +111,7 @@ saveRDS(
   list(
     names = etx$names,
     conc = conc_mg,
-    indv = living
+    indv = etx$indv
   ),
   './data/02-full_merged.rds'
 )

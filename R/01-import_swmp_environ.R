@@ -62,7 +62,8 @@ wq_sum <- wq |>
           DO_min = min(DO_mgl, na.rm = T),
           Chl = mean(ChlFluor, na.rm = T),
           Chl_max = max(ChlFluor, na.rm = T),
-          Chl_min = min(ChlFluor, na.rm = T)
+          Chl_min = min(ChlFluor, na.rm = T),
+          Turb = mean(as.numeric(Turb), na.rm = T)
           ) |> 
   mutate(sample_id = paste(sample_site, date, sep = '_')) |> 
   ungroup()
@@ -88,7 +89,7 @@ extreme_to_na <- function(vect, sd_away) {
 
 wq_sum <- wq_sum |> 
   mutate(
-    across(c(s_max, sal, DO, DO_min, Chl, Chl_max, Chl_min), ~ extreme_to_na(.,5))
+    across(c(s_max, sal, DO, DO_min, Chl, Chl_max, Chl_min, Turb), ~ extreme_to_na(.,5))
   )
 
 

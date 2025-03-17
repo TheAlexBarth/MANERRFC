@@ -17,8 +17,8 @@ library(tidyr)
 
 # region \- read data ---------------------------
 # will need local adjustment
-# path = 'C:/Users/David Malcolm/Box/TGCRC Plankton Food Webs/Data/NERRFC'
-path = '~/Library/CloudStorage/Box-Box/TGCRC Plankton Food Webs/Data/NERRFC'
+ path = 'C:/Users/David Malcolm/Box/TGCRC Plankton Food Webs/Data/NERRFC'
+#path = '~/Library/CloudStorage/Box-Box/TGCRC Plankton Food Webs/Data/NERRFC'
 
 raw <- read_etx(paste0(path,'/temp_flowcam-full.tsv'))
 raw$sample_site <- raw$sample_site |> toupper()
