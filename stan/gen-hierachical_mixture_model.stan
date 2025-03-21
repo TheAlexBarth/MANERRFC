@@ -12,7 +12,7 @@ data {
 
     // response inputs
     array[N_obs] int n; // n_counts
-    vector[N_mes] log_b; // biomass concentration (logged)
+    vector[N_mes] log_b; // biomass of individuals (logged)
 
     // predictor inputs
     int<lower=0> K_count; // count preds

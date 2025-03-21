@@ -63,6 +63,22 @@ conc_mg <- etx$conc |>
     by = c('yearmo')
   )
 
+
+# region \- merge indv. ----------------
+indv_merged <- etx$indv |>
+  left_join(
+    wq_yearmo,
+    by = c('sample_site', 'yearmo')
+  ) |> 
+  left_join(
+    nut_yearmo,
+      by = c('sample_site', 'yearmo')
+  ) |> 
+  left_join(
+    wind_yearmo,
+    by = c('yearmo')
+  )
+
 #  curiousity plot
 #  ggplot(
 #   conc_mg |> 
