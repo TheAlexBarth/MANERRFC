@@ -9,9 +9,10 @@ source('./R/utils-mod_making.R')
 
 etx <- readRDS("./data/02-full_merged.RDS")
 
-taxa_group <- 'diatom'
+taxa_group <- 'mz'
 niter = 8000
 nburn = 1000
+nchains = 3
 
 
 core_data <- prep_component_data(taxa_group)
@@ -62,7 +63,7 @@ for(name in names(poss_full)) {
   poss_matrix[[name]] <- prep_pred_matrix(
     poss_full[[name]]$count_preds,
     poss_full[[name]]$indv_preds,
-    diat_data
+    core_data
   )
 }
 
@@ -71,8 +72,8 @@ no_indv_preds <- lapply(
   function(x) 
     return(list(
       X_counts = poss_matrix[[x]]$X_counts,
-      X_indv = matrix(1, nrow(diat_data$indv_mes), 1),
-      pred_indv = matrix(1, nrow(diat_data$all_conc), 1)
+      X_indv = matrix(1, nrow(core_data$indv_mes), 1),
+      pred_indv = matrix(1, nrow(core_data$all_conc), 1) # take this matrix as indv if noindv is selected
     ))
 )
 names(no_indv_preds) <- paste0(names(poss_matrix), '_noindv')
@@ -92,7 +93,7 @@ for(name in names(all_preds)) {
     all_preds[[name]],
     core_data,
     main_model,
-    chains = 1,
+    chains = nchains,
     iter = niter,
     warmup = nburn,
     cores = parallel::detectCores()
@@ -151,4 +152,4 @@ ggplot(plot_df |>
   theme(axis.text = element_text(angle = 45))
 
 
-ggsave('./output/03-diatom_best_fit.png')
+ggsave(paste0('./output/03-best_fit-', taxa_group,'.png'))
