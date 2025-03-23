@@ -127,7 +127,7 @@ saveRDS(
   list(
     names = etx$names,
     conc = conc_mg,
-    indv = etx$indv
+    indv = indv_merged
   ),
   './data/02-full_merged.rds'
 )

@@ -24,6 +24,10 @@ data {
     // group factor
     array[N_obs] int group_counts; // factor id
     array[N_mes] int group_bio;
+
+    // for prediction
+    vector[N_obs] y_real;
+    matrix[N_obs, K_bmass] Xpred_indv;
 }
 
 parameters {
@@ -59,12 +63,36 @@ model {
 
     // count data model
     for (i in 1:N_obs) {
-        real lambda = exp(dot_product(beta_count[group_counts[i]], X_count[i]) + log(img_vol[i]));
+        real lambda = exp(dot_product(beta_count[group_counts[i]], X_count[i,]) + log(img_vol[i]));
         n[i] ~ poisson(lambda);
     }
 
     // biomass data model
     for (i in 1:N_mes) {
-        log_b[i] ~ normal(dot_product(beta_bio[group_bio[i]], X_bio[i]), v);
+        log_b[i] ~ normal(dot_product(beta_bio[group_bio[i]], X_bio[i,]), v);
     }
+}
+
+generated quantities {
+    real SSE=0;
+    real RMSPE;
+
+    for(i in 1:N_obs){
+        real lambda = exp(
+            dot_product(beta_count[group_counts[i]], X_count[i]) + log(img_vol[i]) 
+        );
+        int n_sim = poisson_rng(lambda);
+
+        // this isn't direct but simulate using the posterior params 
+        // from the group
+        // this only works if all levels are the same!
+        real mu = dot_product(
+            beta_bio[group_counts[i]], Xpred_indv[i]
+        );
+
+        real logbmass_sim = normal_rng(mu, v);
+        real y_sim = (n_sim * exp(logbmass_sim)) / img_vol[i];
+        SSE += (y_sim - y_real[i])^2;
+    }
+    RMSPE = sqrt(SSE/N_obs);
 }
