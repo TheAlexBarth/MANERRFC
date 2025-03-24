@@ -13,6 +13,7 @@
 #' 
 #' Needs taxonomic group and etx to exist in global scope
 prep_component_data <- function(taxo_group) {
+  require(dplyr)
   
   # some warning
   if(!exists("etx")) {
@@ -95,30 +96,34 @@ prep_component_data <- function(taxo_group) {
 #' 
 #' requires vectors for predictor names
 #' AND prep_component_data list
-prep_pred_matrix <- function(count_preds, indv_pred, data_list) {
+prep_pred_matrix <- function(count_preds, indv_pred = NULL, data_list) {
   x_c <- 1
   for(pred in count_preds) {
     x_c <- cbind(x_c, data_list$all_conc[[pred]] |> scale())
   }
   colnames(x_c) = c('int',count_preds)
 
-  x_i <- 1
-  for(pred in indv_pred) {
-    x_i <- cbind(x_i, data_list$indv_mes[[pred]] |> scale())
+  if(is.null(indv_pred)) {
+    x_i <-  matrix(1, nrow(data_list$indv_mes), 1)
+    pred_indv <- matrix(1, nrow(data_list$all_conc),1)
+  } else {
+    x_i <- 1
+    for(pred in indv_pred) {
+      x_i <- cbind(x_i, data_list$indv_mes[[pred]] |> scale())
+    }
+    colnames(x_i) = c('int',indv_pred)
+  
+    pred_indv <- data_list$all_conc |> 
+      ungroup() |> 
+      select(all_of(indv_pred)) |> 
+      mutate(
+        across(everything(), scale)
+      )
+    if(any(is.na(pred_indv))){
+      is.na(pred_indv) <- 0 # since it's scaled mean should be near 0
+    }
+    pred_indv <- cbind(1, pred_indv)
   }
-  colnames(x_i) = c('int',indv_pred)
-
-  pred_indv <- data_list$all_conc |> 
-    ungroup() |> 
-    select(all_of(indv_pred)) |> 
-    mutate(
-      across(everything(), scale)
-    )
-  if(any(is.na(pred_indv))){
-    is.na(pred_indv) <- 0 # since it's scaled mean should be near 0
-  }
-  pred_indv <- cbind(1, pred_indv)
-
   return(
     list(
       X_counts = x_c,
@@ -141,6 +146,7 @@ prep_pred_matrix <- function(count_preds, indv_pred, data_list) {
 #' compiled model
 #' ... for chains, iters, cores, warmup
 fit_component_mod <- function(pred_list, data_list, cmpld_model, ...) {
+  require(rstan)
 
   stan_data <- list(
     N_obs = nrow(data_list$all_conc),
@@ -167,3 +173,79 @@ fit_component_mod <- function(pred_list, data_list, cmpld_model, ...) {
   
   return(mod_fit)
 }
+
+
+fit_model <- function(
+  full_data,
+  taxa_group,
+  count_preds, 
+  indv_preds = NULL, 
+  niter = 8000, 
+  nburn = 500, 
+  nchains = 4
+) {
+  require(rstan)
+
+  cat(
+    ".\n",
+    '===========================',
+        ".\n",
+    paste0('Rewriting model file for: ', taxa_group,'. If this was a mistake -- QUICK CANCEL'),
+        ".\n",
+    '===========================',
+    '.\n'
+  )
+
+  etx <- full_data
+
+  taxa_group <- taxa_group
+  
+  
+  core_data <- prep_component_data(taxa_group)
+  
+  ###################
+  # MARK: MODEL CONSTRUCTION 
+  ###################
+  
+  # region \- DEFINE predictors ------------
+  counts_poss_preds <- count_preds
+  indv_poss_preds <- indv_preds
+  
+  # region \- possible preds --------------------------------
+  
+  
+  all_preds <- prep_pred_matrix(
+    counts_poss_preds,
+    indv_poss_preds,
+    data_list = core_data
+  )
+  
+  main_model <- stan_model(file = './stan/gen-hierachical_mixture_model.stan')
+  
+  mod_fit <- fit_component_mod(
+    all_preds,
+    core_data,
+    main_model,
+    chains = nchains,
+    iter = niter,
+    warmup = nburn,
+    cores = parallel::detectCores()
+  )
+  
+  saveRDS(
+    list(
+      mod = mod_fit,
+      count_preds = count_preds,
+      indv_preds = indv_preds,
+      group_names = levels(core_data$all_conc$group)
+    ), 
+    paste0('./data/04-mod_output-', taxa_group,".RDS")
+  )
+  cat(
+    '.\n','=============','.\n', 
+    paste0('Model saved for: ', taxa_group),
+    '.\n','=============','.\n' 
+  )
+}
+
+
