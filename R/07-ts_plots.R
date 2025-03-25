@@ -11,12 +11,14 @@ source('./R/utils.R')
 source('./R/utils-posterior_specific.R')
 source('./R/utils-mod_making.R')
 
-#############
+###########
 # MARK: CHOOSE TAXA 
 #############
 
-taxa = 'mz'
+taxa = 'diatom'
 
+
+# THIS ONLY WORKS BECAUSE NONE ARE INFLUENCED BY NUTRIENTS
 
 ##############################
 # MARK: LOAD DATA
@@ -26,6 +28,16 @@ taxa = 'mz'
 etx <- readRDS('./data/02-full_merged.rds')
 group_data <- prep_component_data(taxa)
 mod = readRDS(paste0('./data/04-mod_output-',taxa,'.RDS'))
+wq_full = readRDS('./data/01-environ_clean.rds')
+
+wq <- wq_full$wq_sum |> 
+  select(date, sample_site, t, sal, do = DO, turb = Turb) |> 
+  left_join(
+    wq_full$wind_avg |> 
+      select(date, windspeed),
+    by = 'date'
+  )
+
 
 
 ########################
@@ -36,41 +48,29 @@ mod = readRDS(paste0('./data/04-mod_output-',taxa,'.RDS'))
 
 post_coef = rstan::extract(mod$mod, pars = c('beta_bio','beta_count', 'v'))
 
-
-
-
 ########################
 # MARK: prepare data
 ########################
 
+# need to do for each site
 
-# region \- set parameter! ---------------
-param = 'sal'
-
-sal_marginal <- make_marg_data(
-  param = 'sal', # change here for parameters
-  data = group_data,
-  mod = mod,
-  post_coef = post_coef,
-  sim.res = 100 # can adjust if wanted but will get slow
-)
-
-
+ce_pred <- make_ts_data('CE', wq = wq, data = group_data, mod = mod, post_coef = post_coef)
 
 
 #################
 # MARK: MAKE PLOT
 #################
 
-# need to provide, taxa, sim_data (marginal from function above), fill_col, anything else
-# will effect the point features
-sal_tintinnid_plot <- make_marg_plot(
-  taxa = 'Tintinnina',
-  sal_marginal,
-  fill_col = '#ff888800',
-  color = '#840b0b' # this affects the points
+
+ce_ts_total <- make_ts_plot(
+  taxa = 'Thalassionema',
+  site = 'CE',
+  sim_data = ce_pred,
+  fill_col = '#4500f4',
+  size = 2 #affect the points
 )
 
-sal_tintinnid_plot +
-  labs(x = "Salinity", y = "pgC / L")+
-  theme_classic()
+ce_ts_total +
+  labs(x = "", y = "pgC / L") +
+  scale_x_date()+
+  theme_minimal()
