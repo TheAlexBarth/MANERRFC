@@ -212,14 +212,15 @@ diatom_Biomass_v_Wind <- ggplot(full$conc |>
               x = windspeed,
               y = log(pgC_L+1),
               color = sample_site
-            ),
-            method = 'lm'
+            )
           )+ 
           theme_minimal()
 
 diatom_Biomass_v_Wind <- diatom_Biomass_v_Wind + ggtitle("Diatom Biomass Concentration vs. Wind Speed") +
   xlab("Average Monthly Wind Speed (m/s)") + 
   ylab("log Diatom Biomass Concentration (log(pgC/L)")
+
+diatom_Biomass_v_Wind
 
 ggsave("diatom_Biomass_v_Wind.png", plot = diatom_Biomass_v_Wind, width = 7, height = 5)
 ggsave("diatom_Biomass_v_Wind.svg", plot = diatom_Biomass_v_Wind, width = 7, height = 5)
@@ -537,3 +538,433 @@ cili_Biomass_v_Turbid <- cili_Biomass_v_Turbid + ggtitle("Ciliate Biomass Concen
 ggsave("cili_Biomass_v_Turbid.png", plot = cili_Biomass_v_Turbid, width = 7, height = 5)
 ggsave("cili_Biomass_v_Turbid.svg", plot = cili_Biomass_v_Turbid, width = 7, height = 5)
 ###########################################################################
+
+#17 Stacked Bar Plot for whole estuary, taxa colored by diatom/dino/mz, grouped to year
+
+#create dataset
+
+full$conc <- full$conc |> 
+  mutate(
+    category = case_when(
+      taxa %in% full$names$diatom ~ "Diatoms",
+      taxa %in% full$names$dino ~ "Dinos",
+      taxa %in% full$names$mz ~ "MZ",
+      TRUE ~ NA_character_  # Exclude taxa that don’t match
+    )
+  ) |> 
+  filter(!is.na(category))  # Remove non-matching taxa
+# Summarize biomass by category and time
+biomass_summary <- full$conc |> 
+  group_by(yearmo, category) |> 
+  summarize(
+    total_pgC_L = sum(pgC_L, na.rm = TRUE),
+    .groups = "drop"
+  )
+# Create stacked bar plot
+ggplot(biomass_summary, aes(x = yearmo, y = total_pgC_L, fill = category)) +
+  geom_bar(stat = "identity", position = "fill") +  # Stacked bars
+  scale_x_date(date_labels = "%b %Y", date_breaks = "3 months") +  # Format x-axis
+  labs(title = "Stacked Biomass Time Series",
+       x = "Time (Year-Month)", 
+       y = "Biomass (pgC/L)", 
+       fill = "Taxa Category") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-axis labels
+#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_
+
+#18 Stacked Bar Plot for Aransas Bay, taxa colored by diatom/dino/mz, grouped to year
+
+#create dataset
+
+AB_Stack_Filter <- full$conc |> 
+  filter(sample_site == "AB") |>  # Filter for sample site 'AB'
+  mutate(
+    category = case_when(
+      taxa %in% full$names$diatom ~ "Diatoms",
+      taxa %in% full$names$dino ~ "Dinos",
+      taxa %in% full$names$mz ~ "MZ",
+      TRUE ~ NA_character_  # Exclude taxa that don’t match
+    )
+  ) |> 
+  filter(!is.na(category))  # Remove non-matching taxa
+# Summarize biomass by category and time
+biomass_summary <- AB_Stack_Filter |> 
+  group_by(yearmo, category) |> 
+  summarize(
+    total_pgC_L = sum(pgC_L, na.rm = TRUE),
+    .groups = "drop"
+  )
+# Create stacked bar plot
+ggplot(biomass_summary, aes(x = yearmo, y = total_pgC_L, fill = category)) +
+  geom_bar(stat = "identity", position = "fill") +  # Stacked bars
+  scale_x_date(date_labels = "%b %Y", date_breaks = "3 months") +  # Format x-axis
+  labs(title = "Stacked Biomass Time Series (Sample Site: AB)",
+       x = "Time (Year-Month)", 
+       y = "Biomass (pgC/L)", 
+       fill = "Taxa Category") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-axis labels
+#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_
+
+#19 Stacked Bar Plot for Copano West, taxa colored by diatom/dino/mz, grouped to year
+
+#create dataset
+
+CW_Stack_Filter <- full$conc |> 
+  filter(sample_site == "CW") |>  # Filter for sample site 'CW'
+  mutate(
+    category = case_when(
+      taxa %in% full$names$diatom ~ "Diatoms",
+      taxa %in% full$names$dino ~ "Dinos",
+      taxa %in% full$names$mz ~ "MZ",
+      TRUE ~ NA_character_  # Exclude taxa that don’t match
+    )
+  ) |> 
+  filter(!is.na(category))  # Remove non-matching taxa
+# Summarize biomass by category and time
+biomass_summary <- CW_Stack_Filter |> 
+  group_by(yearmo, category) |> 
+  summarize(
+    total_pgC_L = sum(pgC_L, na.rm = TRUE),
+    .groups = "drop"
+  )
+# Create stacked bar plot
+CW_Stack <- ggplot(biomass_summary, aes(x = yearmo, y = total_pgC_L, fill = category)) +
+  geom_bar(stat = "identity", position = "fill") +  # Stacked bars
+  scale_x_date(date_labels = "%b %Y", date_breaks = "3 months") +  # Format x-axis
+  labs(title = "Stacked Biomass Time Series (Sample Site: CW)",
+       x = "Time (Year-Month)", 
+       y = "% Biomass", 
+       fill = "Taxa Category") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-axis labels
+
+ggsave("CW_Stack.png", plot = CW_Stack, width = 13, height = 2.25)
+#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_
+
+#20 Stacked Bar Plot for Copano East, taxa colored by diatom/dino/mz, grouped to year
+
+#create dataset
+
+CE_Stack_Filter <- full$conc |> 
+  filter(sample_site == "CE") |>  # Filter for sample site 'CE'
+  mutate(
+    category = case_when(
+      taxa %in% full$names$diatom ~ "Diatoms",
+      taxa %in% full$names$dino ~ "Dinos",
+      taxa %in% full$names$mz ~ "MZ",
+      TRUE ~ NA_character_  # Exclude taxa that don’t match
+    )
+  ) |> 
+  filter(!is.na(category))  # Remove non-matching taxa
+# Summarize biomass by category and time
+biomass_summary <- CE_Stack_Filter |> 
+  group_by(yearmo, category) |> 
+  summarize(
+    total_pgC_L = sum(pgC_L, na.rm = TRUE),
+    .groups = "drop"
+  )
+# Create stacked bar plot
+ggplot(biomass_summary, aes(x = yearmo, y = total_pgC_L, fill = category)) +
+  geom_bar(stat = "identity", position = "fill") +  # Stacked bars
+  scale_x_date(date_labels = "%b %Y", date_breaks = "3 months") +  # Format x-axis
+  labs(title = "Stacked Biomass Time Series (Sample Site: CE)",
+       x = "Time (Year-Month)", 
+       y = "Biomass (pgC/L)", 
+       fill = "Taxa Category") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-axis labels
+#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_
+
+#21 Stacked Bar Plot for Mesquite Bay, taxa colored by diatom/dino/mz, grouped to year
+
+#create dataset
+
+MB_Stack_Filter <- full$conc |> 
+  filter(sample_site == "MB") |>  # Filter for sample site 'MB'
+  mutate(
+    category = case_when(
+      taxa %in% full$names$diatom ~ "Diatoms",
+      taxa %in% full$names$dino ~ "Dinos",
+      taxa %in% full$names$mz ~ "MZ",
+      TRUE ~ NA_character_  # Exclude taxa that don’t match
+    )
+  ) |> 
+  filter(!is.na(category))  # Remove non-matching taxa
+# Summarize biomass by category and time
+biomass_summary <- MB_Stack_Filter |> 
+  group_by(yearmo, category) |> 
+  summarize(
+    total_pgC_L = sum(pgC_L, na.rm = TRUE),
+    .groups = "drop"
+  )
+# Create stacked bar plot
+ggplot(biomass_summary, aes(x = yearmo, y = total_pgC_L, fill = category)) +
+  geom_bar(stat = "identity", position = "fill") +  # Stacked bars
+  scale_x_date(date_labels = "%b %Y", date_breaks = "3 months") +  # Format x-axis
+  labs(title = "Stacked Biomass Time Series (Sample Site: MB)",
+       x = "Time (Year-Month)", 
+       y = "Biomass (pgC/L)", 
+       fill = "Taxa Category") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-axis labels
+#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_
+
+#22 Stacked Bar Plot for Ship Channel, taxa colored by diatom/dino/mz, grouped to year
+
+#create dataset
+
+SC_Stack_Filter <- full$conc |> 
+  filter(sample_site == "SC") |>  # Filter for sample site 'SC'
+  mutate(
+    category = case_when(
+      taxa %in% full$names$diatom ~ "Diatoms",
+      taxa %in% full$names$dino ~ "Dinos",
+      taxa %in% full$names$mz ~ "MZ",
+      TRUE ~ NA_character_  # Exclude taxa that don’t match
+    )
+  ) |> 
+  filter(!is.na(category))  # Remove non-matching taxa
+# Summarize biomass by category and time
+biomass_summary <- SC_Stack_Filter |> 
+  group_by(month, category) |> 
+  summarize(
+    total_pgC_L = mean(pgC_L, na.rm = TRUE),
+    .groups = "drop"
+  )
+# Create stacked bar plot
+ggplot(biomass_summary, aes(x = month, y = total_pgC_L, fill = category)) +
+  geom_bar(stat = "identity", position = "dodge") +  # Stacked bars
+  scale_x_date(date_labels = "%b %Y", date_breaks = "3 months") +  # Format x-axis
+  labs(title = "Stacked Biomass Time Series (Sample Site: SC)",
+       x = "Time (Year-Month)", 
+       y = "Biomass (pgC/L)", 
+       fill = "Taxa Category") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-axis labels
+#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_
+
+#23 Stacked Bar Plot for Copano West, taxa colored by diatom/dino/mz, grouped by month, relative biomass abundance
+
+#create dataset
+
+CW_Stack_Filter <- full$conc |> 
+  filter(sample_site == "CW") |>  # Filter for sample site 'CW'
+  mutate(
+    category = case_when(
+      taxa %in% full$names$diatom ~ "Diatoms",
+      taxa %in% full$names$dino ~ "Dinos",
+      taxa %in% full$names$mz ~ "MZ",
+      TRUE ~ NA_character_  # Exclude taxa that don’t match
+    )
+  ) |> 
+  filter(!is.na(category))  # Remove non-matching taxa
+# Summarize biomass by category and time
+biomass_summary <- CW_Stack_Filter |> 
+  group_by(yearmo, category) |> 
+  summarize(
+    total_pgC_L = sum(pgC_L, na.rm = TRUE),
+    .groups = "drop"
+  )
+# Create stacked bar plot
+CW_Stack <- ggplot(biomass_summary, aes(x = yearmo, y = total_pgC_L, fill = category)) +
+  geom_bar(stat = "identity", position = "fill") +  # Stacked bars
+  scale_x_date(date_labels = "%b %Y", date_breaks = "3 months") +  # Format x-axis
+  labs(title = "River Endmember Plankton Relative Abundance (Site CW)",
+       x = "Time (Year-Month)", 
+       y = "% Biomass", 
+       fill = "Taxa Category") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-axis labels
+
+ggsave("CW_Stack.png", plot = CW_Stack, width = 13, height = 2.25)
+#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_
+
+#24 Stacked Bar Plot for Mesquite Bay, taxa colored by diatom/dino/mz, grouped by month, relative biomass abundance
+
+#create dataset
+
+MB_Stack_Filter <- full$conc |> 
+  filter(sample_site == "MB") |>  # Filter for sample site 'MB'
+  mutate(
+    category = case_when(
+      taxa %in% full$names$diatom ~ "Diatoms",
+      taxa %in% full$names$dino ~ "Dinos",
+      taxa %in% full$names$mz ~ "MZ",
+      TRUE ~ NA_character_  # Exclude taxa that don’t match
+    )
+  ) |> 
+  filter(!is.na(category))  # Remove non-matching taxa
+# Summarize biomass by category and time
+biomass_summary <- MB_Stack_Filter |> 
+  group_by(yearmo, category) |> 
+  summarize(
+    total_pgC_L = sum(pgC_L, na.rm = TRUE),
+    .groups = "drop"
+  )
+# Create stacked bar plot
+MB_Stack <- ggplot(biomass_summary, aes(x = yearmo, y = total_pgC_L, fill = category)) +
+  geom_bar(stat = "identity", position = "fill") +  # Stacked bars
+  scale_x_date(date_labels = "%b %Y", date_breaks = "3 months") +  # Format x-axis
+  labs(title = "Intermediate Salinity Plankton Relative Abundance (Site MB)",
+       x = "Time (Year-Month)", 
+       y = "% Biomass", 
+       fill = "Taxa Category") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-axis labels
+
+ggsave("MB_Stack.png", plot = MB_Stack, width = 13, height = 2.25)
+#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_
+
+#25 Stacked Bar Plot for Ship Channel, taxa colored by diatom/dino/mz, grouped by month, relative biomass abundance
+
+#create dataset
+
+SC_Stack_Filter <- full$conc |> 
+  filter(sample_site == "SC") |>  # Filter for sample site 'SC'
+  mutate(
+    category = case_when(
+      taxa %in% full$names$diatom ~ "Diatoms",
+      taxa %in% full$names$dino ~ "Dinos",
+      taxa %in% full$names$mz ~ "MZ",
+      TRUE ~ NA_character_  # Exclude taxa that don’t match
+    )
+  ) |> 
+  filter(!is.na(category))  # Remove non-matching taxa
+# Summarize biomass by category and time
+biomass_summary <- SC_Stack_Filter |> 
+  group_by(yearmo, category) |> 
+  summarize(
+    total_pgC_L = sum(pgC_L, na.rm = TRUE),
+    .groups = "drop"
+  )
+# Create stacked bar plot
+SC_Stack <- ggplot(biomass_summary, aes(x = yearmo, y = total_pgC_L, fill = category)) +
+  geom_bar(stat = "identity", position = "fill") +  # Stacked bars
+  scale_x_date(date_labels = "%b %Y", date_breaks = "3 months") +  # Format x-axis
+  labs(title = "Marine Endmember Plankton Relative Abundance (Site SC)",
+       x = "Time (Year-Month)", 
+       y = "% Biomass", 
+       fill = "Taxa Category") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-axis labels
+
+ggsave("SC_Stack.png", plot = SC_Stack, width = 13, height = 2.25)
+#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_
+
+#26 Stacked Bar Plot for Copano West, taxa colored by diatom/dino/mz, grouped by month, relative biomass abundance
+
+#create dataset
+
+CW_Stack_Filter <- full$conc |> 
+  filter(sample_site == "CW") |>  # Filter for sample site 'CW'
+  mutate(
+    category = case_when(
+      taxa %in% full$names$diatom ~ "Diatoms",
+      taxa %in% full$names$dino ~ "Dinos",
+      taxa %in% full$names$mz ~ "MZ",
+      TRUE ~ NA_character_  # Exclude taxa that don’t match
+    )
+  ) |> 
+  filter(!is.na(category))  # Remove non-matching taxa
+# Summarize biomass by category and time
+biomass_summary <- CW_Stack_Filter |> 
+  group_by(month, category) |> 
+  summarize(
+    total_pgC_L = sum(pgC_L, na.rm = TRUE),
+    .groups = "drop"
+  )
+# Create stacked bar plot
+CW_Dodge_Month <- ggplot(biomass_summary, aes(x = month, y = total_pgC_L, fill = category)) +
+  geom_bar(stat = "identity", position = "dodge") +  # Stacked bars
+  scale_x_date(date_labels = "%b", date_breaks = "1 month") +  # Format x-axis
+  scale_y_continuous(limits = c(0, 1.0e+10), labels = scales::scientific) + 
+  labs(title = "River Endmember Average Plankton Biomass (Site CW)",
+       x = "Time (Month)", 
+       y = "Biomass (PgC/L)", 
+       fill = "Taxa Category") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-axis labels
+
+CW_Dodge_Month
+
+ggsave("CW_Dodge_Month.png", plot = CW_Dodge_Month, width = 6, height = 6)
+#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_
+
+#27 Stacked Bar Plot for Mesquite Bay, taxa colored by diatom/dino/mz, grouped by month, relative biomass abundance
+
+#create dataset
+
+MB_Stack_Filter <- full$conc |> 
+  filter(sample_site == "MB") |>  # Filter for sample site 'MB'
+  mutate(
+    category = case_when(
+      taxa %in% full$names$diatom ~ "Diatoms",
+      taxa %in% full$names$dino ~ "Dinos",
+      taxa %in% full$names$mz ~ "MZ",
+      TRUE ~ NA_character_  # Exclude taxa that don’t match
+    )
+  ) |> 
+  filter(!is.na(category))  # Remove non-matching taxa
+# Summarize biomass by category and time
+biomass_summary <- MB_Stack_Filter |> 
+  group_by(month, category) |> 
+  summarize(
+    total_pgC_L = sum(pgC_L, na.rm = TRUE),
+    .groups = "drop"
+  )
+# Create stacked bar plot
+MB_Dodge_Month <- ggplot(biomass_summary, aes(x = month, y = total_pgC_L, fill = category)) +
+  geom_bar(stat = "identity", position = "dodge") +  # Stacked bars
+  scale_x_date(date_labels = "%b", date_breaks = "1 month") +  # Format x-axis
+  scale_y_continuous(limits = c(0, 1.0e+10), labels = scales::scientific) + 
+  labs(title = "Intermediate Salinity Average Plankton Biomass (Site MB)",
+       x = "Time (Month)", 
+       y = "Biomass (PgC/L)", 
+       fill = "Taxa Category") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-axis labels
+
+MB_Dodge_Month
+
+ggsave("MB_Dodge_Month.png", plot = MB_Dodge_Month, width = 6, height = 6)
+#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_
+
+#28 Stacked Bar Plot for Ship Channel, taxa colored by diatom/dino/mz, grouped by month, relative biomass abundance
+
+#create dataset
+
+SC_Stack_Filter <- full$conc |> 
+  filter(sample_site == "SC") |>  # Filter for sample site 'SC'
+  mutate(
+    category = case_when(
+      taxa %in% full$names$diatom ~ "Diatoms",
+      taxa %in% full$names$dino ~ "Dinos",
+      taxa %in% full$names$mz ~ "MZ",
+      TRUE ~ NA_character_  # Exclude taxa that don’t match
+    )
+  ) |> 
+  filter(!is.na(category))  # Remove non-matching taxa
+# Summarize biomass by category and time
+biomass_summary <- SC_Stack_Filter |> 
+  group_by(month, category) |> 
+  summarize(
+    total_pgC_L = sum(pgC_L, na.rm = TRUE),
+    .groups = "drop"
+  )
+# Create stacked bar plot
+SC_Dodge_Month <- ggplot(biomass_summary, aes(x = month, y = total_pgC_L, fill = category)) +
+  geom_bar(stat = "identity", position = "dodge") +  # Stacked bars
+  scale_x_date(date_labels = "%b", date_breaks = "1 month") +  # Format x-axis
+  scale_y_continuous(limits = c(0, 1.0e+10), labels = scales::scientific) + 
+  labs(title = "Marine Endmember Average Plankton Biomass (Site SC)",
+       x = "Time (Month)", 
+       y = "Biomass (PgC/L)", 
+       fill = "Taxa Category") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-axis labels
+
+SC_Dodge_Month
+
+ggsave("SC_Dodge_Month.png", plot = SC_Dodge_Month, width = 6, height = 6)
+#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_
