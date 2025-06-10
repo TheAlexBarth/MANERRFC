@@ -134,11 +134,12 @@ make_marg_plot <- function(taxa, sim_data, fill_col, ...) {
       )
   }
 
+  filtered_data <- filtered_data[filtered_data[[par_name]] != mean(filtered_data[[par_name]], na.rm = T),]
   p = ggplot() +
     geom_point(
       aes(
         x = filtered_data[[par_name]],
-        y = filtered_data$pgC_L
+        y = filtered_data$pgC_L/5
       ),
       ...
     ) +
