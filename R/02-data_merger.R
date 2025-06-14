@@ -41,7 +41,7 @@ wind_yearmo <- environ$wind_avg |>
   ) |>
   group_by(yearmo) |>
   summarize(
-    across(c(windspeed), mean, na.rm = T)
+    across(c(windspeed, TotalPAR), mean, na.rm = T)
   )
 
 # region \- merge conc ----------
