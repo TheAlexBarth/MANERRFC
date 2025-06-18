@@ -1,0 +1,128 @@
+
+
+Launching Model Selection
+
+
+
+Current Pars: sal, t, do, turb, windspeed, TotalPAR, CHLA_N, P, NH4, N
+
+=================
+Checking: N
+=================
+====================
+Keeping: N No Pred Improve
+====================
+
+=================
+Checking: NH4
+=================
+====================
+Keeping: NH4 No Pred Improve
+====================
+====================
+Keeping: NH4 Effect at Some Level
+====================
+
+=================
+Checking: P
+=================
+====================
+Keeping: P No Pred Improve
+====================
+
+=================
+Checking: CHLA_N
+=================
+====================
+Keeping: CHLA_N No Pred Improve
+====================
+
+=================
+Checking: TotalPAR
+=================
+====================
+Dropping: TotalPAR
+====================
+====================
+Model Finalized: sal, t, do, turb, windspeed, CHLA_N, P, NH4, N
+====================
+
+Current Pars: sal, t, do, turb, windspeed, CHLA_N, P, NH4, N
+
+=================
+Checking: N
+=================
+====================
+Keeping: N No Pred Improve
+====================
+
+=================
+Checking: NH4
+=================
+====================
+Keeping: NH4 No Pred Improve
+====================
+====================
+Keeping: NH4 Effect at Some Level
+====================
+
+=================
+Checking: P
+=================
+====================
+Keeping: P No Pred Improve
+====================
+
+=================
+Checking: CHLA_N
+=================
+====================
+Keeping: CHLA_N No Pred Improve
+====================
+
+=================
+Checking: windspeed
+=================
+====================
+Keeping: windspeed No Pred Improve
+====================
+====================
+Keeping: windspeed Effect at Some Level
+====================
+
+=================
+Checking: turb
+=================
+====================
+Keeping: turb Effect at Some Level
+====================
+
+=================
+Checking: do
+=================
+====================
+Keeping: do No Pred Improve
+====================
+====================
+Keeping: do Effect at Some Level
+====================
+
+=================
+Checking: t
+=================
+====================
+Keeping: t No Pred Improve
+====================
+====================
+Keeping: t Effect at Some Level
+====================
+
+=================
+Checking: sal
+=================
+====================
+Keeping: sal Effect at Some Level
+====================
+====================
+Model Finalized: sal, t, do, turb, windspeed, CHLA_N, P, NH4, N
+====================
