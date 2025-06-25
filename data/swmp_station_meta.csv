@@ -1,9 +1,4 @@
 station_code,station_abbv,type,station_name,lat,lon
-marscwq   ,sc,wq,Ship Channel,27.8383,-97.0503
-marcewq   ,ce,wq,Copano Bay East,28.1323,-97.0344
-marabwq   ,ab,wq,Aransas Bay,27.9798,-97.0287
-marmbwq   ,mb,wq,Mesquite Bay,28.1384,-96.8285
-marcwwq   ,cw,wq,Copano Bay West,28.0841,-97.2009
 marmbnut  ,mb,nut,Mesquite Bay,28.1384,-96.8285
 marabnut  ,ab,nut,Aransas Bay,27.9798,-97.0287
 marcenut  ,ce,nut,Copano Bay East,28.1323,-97.0344

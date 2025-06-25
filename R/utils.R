@@ -352,3 +352,14 @@ mean_list <- function(mat_list, sp_range = sal_pred){
   
   return(l)
 }
+
+# region Make Yearmo Column -----------------------
+
+make_yearmo <- function(data, date_col = 'date') {
+  if(is.null(data[[date_col]])) {
+    stop('date is not a valid column in dataframe')
+  }
+  require(lubridate)
+  as.Date(paste(year(data[[date_col]]), month(data[[date_col]]), '01', sep= '-'))
+}
+# endregion -----------------------
