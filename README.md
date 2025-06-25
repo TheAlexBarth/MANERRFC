@@ -2,25 +2,10 @@
 
 # MANERRFC
 
-Processing of Mission Aransas NERR flowcam data
+Processing of Mission Aransas NERR and SWMP data for analysis investigating microplankton trophic roles across regime cycles.
 
-# Getting started
+# Organization
 
-To work through these scripts, follow the numeric flow of the files for the R scripts. Many of these are data generating and need not be ran multiple times. I try to write code to function as units - scripts should be able to be run from terminal.
+Scripts follow a category-numeric labeling scheme. Most data processing is all through R. 'pipe' scripts imports external data and formats them for local use. Scripts which conduct analyses are not prefixed, but follow the same numbering convention. Generated data files are stored as RDS, with the numeric code referencing the script which generated those data. External data which are available locally are denoted as 'xx-'. If a script requires external data which are not available, it should indicate in the top where to access those data. For direct questions or access, contact alex barth. 
 
-Data products correspond to the script which produced them.
-
-# R/
-
--   00: import ecotaxa data and inital formatting
--   01: import environmental
--   02: merge environmental to scales matching etx data
-    -   This is really just to keep code clean down the line.
-
-# Stan/
-
-A generalized stan script to support the mixture model.
-
-# Data/
-
-All data are stored in the data folder. Note there are some preexisting (non-numbered) data pieces. SWMP data came from pre-processed set of data exported from CDMO. PDSI data was downloaded from {INSERT?}
+Scripts which generate figures are denoted as 'fig' and will place items into the output folder. Stan code used for model building is located in a separate directory from R code.

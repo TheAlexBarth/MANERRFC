@@ -11,6 +11,7 @@ data {
     int<lower=0> N_obs; // sampling observations
     int<lower=0> N_mes; // individual measurements
     int<lower=0> N_groups; // number of groups
+    int N_site;
 
     // response inputs
     array[N_obs] int n; // n_counts
@@ -24,6 +25,8 @@ data {
     // group factor
     array[N_obs] int group_counts; // factor id
     array[N_mes] int group_bio;
+    array[N_site] int group_site;
+
 
     // programmable priors
     real theta_b_mu; // prior on theta_b
@@ -42,6 +45,7 @@ parameters {
 
     // group-level counts covars
     matrix[N_groups, K_count] beta_count;
+    vector[N_site] beta_site;
     vector[N_groups] mu_bio;
     // biomass obs
     real<lower=1e-6> sigma_bio;
@@ -62,6 +66,7 @@ model {
     for (k in 1:K_count) {
         beta_count[, k] ~ normal(theta_count[k], tau_count[k]);
     }
+    beta_site ~ normal(3,1);
 
     for(k in 1:N_groups) {
         mu_bio[k] ~ normal(theta_bio, tau_bio);
@@ -69,7 +74,10 @@ model {
 
     // count data model
     for (i in 1:N_obs) {
-        real log_lambda = dot_product(beta_count[group_counts[i]], X_count[i,]) + log(img_vol[i]);
+        real log_lambda = beta_site[group_site[i]] +
+        dot_product(beta_count[group_counts[i]], X_count[i,]) + 
+        log(img_vol[i]);
+        
         n[i] ~ neg_binomial_2_log(log_lambda, phi);
     }
 
