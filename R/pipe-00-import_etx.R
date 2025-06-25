@@ -81,6 +81,20 @@ living$yearmo <- paste(year(living$date),
                         sep = '-') |> 
   as.Date(format = '%Y-%m-%d')
 
+# get it to be just yearly
+living$year <- paste(year(living$date), 
+                     '01',
+                     '01',
+                     sep = '-') |>
+                       as.Date(format = '%Y-%m-%d')
+
+#date for averaging every month
+living$month <- paste('01', 
+                      month(living$date),
+                      '01',
+                      sep = '-') |>
+  as.Date(format = '%Y-%m-%d')
+
 #change vol to numeric
 living$acq_vol_imaged <- living$acq_vol_imaged |> 
   sapply(function(x) gsub('ml', '',x)) |> 
@@ -147,7 +161,7 @@ micro_den$num_L <- (micro_den$count / micro_den$img_vol) * (1000) #l
 
 micro_den <- micro_den |> 
   left_join(
-    living[,c('id', 'yearmo', 'date', 'sample_site')] |> 
+    living[,c('id', 'yearmo', 'year', 'month', 'date', 'sample_site')] |> 
       unique(),
     by = 'id'
   )|> 
