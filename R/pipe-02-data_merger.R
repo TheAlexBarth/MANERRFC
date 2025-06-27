@@ -5,129 +5,60 @@ rm(list = ls())
 library(ggplot2)
 library(dplyr)
 library(lubridate)
-
+source('./R/utils.R')
 
 etx = readRDS('./data/00-ecotaxa_full.rds')
-environ = readRDS('./data/01-environ_clean.rds')
 
-
-# water quality should be summed in month
-wq_yearmo <- environ$wq_sum |> 
-  mutate(
-    yearmo = paste(year(.data$date),month(.data$date),'01',sep = '-') |> 
-      as.Date()
-  ) |> 
-  group_by(yearmo, sample_site) |> 
-  summarize(
-    across(c(t, t_max, t_min, s_max, sal, DO, DO_min, Chl, Chl_max, Chl_min, Turb), \(x) mean(x, na.rm = T))
-  )
-
-# average to the yearmo for nuts
-nut_yearmo <- environ$nut_avg |> 
-  mutate(
-    yearmo = paste(year(.data$date),month(.data$date),'01',sep = '-') |> 
-      as.Date()
-  ) |> 
-  group_by(yearmo, sample_site) |> 
-  summarize(
-    across(c(P,NH4,N, CHLA_N), \(x) mean(x, na.rm = T))
-  )
-
-# average to the yearmo for winds
-wind_yearmo <- environ$wind_avg |>
-  mutate(
-    yearmo = paste(year(.data$date),month(.data$date),'01',sep = '-') |>
-      as.Date()
-  ) |>
-  group_by(yearmo) |>
-  summarize(
-    across(c(windspeed, TotalPAR), mean, na.rm = T)
-  )
+wq <- readRDS('./data/01a-swmp_wq_data.rds')
+chl <- readRDS('./data/01b-size_frac_chl.RDS')
+wind <- readRDS('./data/01c-wind_score.RDS')
 
 # region \- merge conc ----------
 
 
 #attach variates to each concentration. Start with All
 
-conc_mg <- etx$conc |> 
+troph_conc <- etx$conc |> 
+  group_by(functional_role, sample_site, yearmo, id) |> 
+  summarize(
+    count = sum(count),
+    img_vol = unique(img_vol)
+  ) |> 
+  ungroup() |> 
   left_join(
-    wq_yearmo,
-    by = c('sample_site', 'yearmo')
+    wq |> 
+      select(P, NH4, N, CHLA_N, temp, sal, sampling_site, yearmo),
+    by = c('sample_site' = 'sampling_site','yearmo')
   ) |> 
   left_join(
-    nut_yearmo,
-    by = c('sample_site', 'yearmo')
-  ) |>
+    chl |> 
+      select(micro, nano, pico, site, yearmo),
+     by = c('sample_site' = 'site','yearmo')
+  ) |> 
   left_join(
-    wind_yearmo,
-    by = c('yearmo')
+    wind |> 
+      select(wind_pca, yearmo),
+     by = c('yearmo'),
+     relationship = 'many-to-many'
   )
+
+troph_conc$sample_site <- factor(troph_conc$sample_site, levels = levels(site_factors))
+troph_conc$functional_role <- factor(troph_conc$functional_role, levels = levels(troph_factors))
 
 
 # region \- merge indv. ----------------
-indv_merged <- etx$indv |>
-  left_join(
-    wq_yearmo,
-    by = c('sample_site', 'yearmo')
-  ) |> 
-  left_join(
-    nut_yearmo,
-      by = c('sample_site', 'yearmo')
-  ) |> 
-  left_join(
-    wind_yearmo,
-    by = c('yearmo')
+indv_clean <- etx$indv |>
+  select(
+    yearmo, functional_role, um3, cmass, group, taxo_name, sample_site
   )
 
-#  curiousity plot
-#  ggplot(
-#   conc_mg |> 
-#     filter(taxa %in% etx$name$diatom)
-#   ) +
-#    geom_point(
-#      aes(
-#        x = windspeed,
-#        y = log(pgC_L+1)
-#      )
-#    ) +
-#    geom_abline(slope = 1, intercept = 0)
-
-
-# # region \- merge living --------------
-# living <- etx$indv |> 
-#   left_join(
-#     wq_yearmo,
-#     by = c('sample_site', 'yearmo')
-#   ) |> 
-#   left_join(
-#     nut_yearmo,
-#     by = c('sample_site', 'yearmo')
-#   ) |>
-#    left_join(
-#      wind_yearmo,
-#      by = c('yearmo')
-#    )
-
-
-#  tot_conc <- conc_mg |> 
-#    group_by(id,sample_site) |> 
-#    summarize(
-#      pgC_L = sum(pgC_L, na.rm = T)
-#    ) |> 
-#    left_join(
-#      conc_mg |> 
-#        select(id, t, Chl, sal),
-#      by = 'id'
-#    ) |> 
-#    unique()
-
-
+indv_clean$functional_role <- factor(indv_clean$functional_role, levels = levels(troph_factors))
+indv_clean$taxo_name <- factor(indv_clean$taxo_name, levels = unique(indv_clean$taxo_name))
  
 saveRDS(
   list(
-    names = etx$names,
-    conc = conc_mg,
-    indv = indv_merged
+    conc = troph_conc,
+    indv = indv_clean
   ),
   './data/02-full_merged.rds'
 )

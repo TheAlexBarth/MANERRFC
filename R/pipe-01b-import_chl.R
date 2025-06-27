@@ -9,6 +9,8 @@ library(tidyr)
 library(stringr)
 library(lubridate)
 
+source('./R/utils.R')
+
 path = '~/Library/CloudStorage/Box-Box/TGCRC Plankton Food Webs/Data/NERRFC/size_frac_chl'
 
 all_files <- dir(path, full.names = TRUE)
@@ -122,5 +124,7 @@ good_data <- wide_data |>
   )
 
 good_data$yearmo <- as.Date(paste(year(good_data$date), month(good_data$date), '01',sep = '-'))
+
+good_data <- good_data[which(year(good_data$yearmo) %in% c(2014:2021)),]
 
 saveRDS(good_data,'./data/01b-size_frac_chl.RDS')

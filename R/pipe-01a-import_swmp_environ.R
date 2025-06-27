@@ -16,7 +16,7 @@ library(lubridate)
 path = '~/Library/CloudStorage/Box-Box/TGCRC Plankton Food Webs/Data/NERRFC/SWMP_TRIP_RECS'
 
 all_files <- dir(path, full.names = TRUE)
-years <- c(2014:2021)
+years <- c(2011:2021)
 raw_files <- list()
 for(i in 1:length(years)) {
   file <- grep(years[i], all_files, value = TRUE)
@@ -51,6 +51,12 @@ raw_df$NO23F[grepl("<-3>", raw_df$F_NO23F)] <- NA
 raw_df$Date <- raw_df$DateTimeStamp |> 
   as.POSIXct(format = '%m/%d/%Y %H:%M') |> 
   as.Date()
+
+# remove funky nitrogen observation
+raw_df$NO23F[which(
+  grepl('sc',raw_df$Station.Code) & raw_df$Date %in% as.Date(c("2016-05-05",'2016-05-06'))
+)] <- NA
+
 raw_df$yearmo <- make_yearmo(raw_df, 'Date')
 
 raw_df$sampling_site <- substr(raw_df$Station.Code, 4,5) |> toupper()
@@ -75,10 +81,14 @@ fix_df <- cbind(year(mo_nut$yearmo), month(mo_nut$yearmo), mo_nut |>
 
 fix_pca <- imputePCA(fix_df)
 
+# plot(fix_pca$completeObs[,3], fix_pca$fittedX[,3], col = is.na(mo_nut$temp)+1)
+# plot(fix_pca$completeObs[,4], fix_pca$fittedX[,4], col = is.na(mo_nut$sal)+1)
+
+
 mo_nut$temp[is.na(mo_nut$temp)] <- fix_pca$completeObs[,3][is.na(mo_nut$temp)]
 mo_nut$sal[is.na(mo_nut$sal)] <- fix_pca$completeObs[,4][is.na(mo_nut$sal)]
 
 saveRDS(
   mo_nut,
-  './data/01a-swmp_wq_data'
+  './data/01a-swmp_wq_data.rds'
 )

@@ -3,7 +3,7 @@ library(dplyr)
 library(ggplot2)
 library(ggpubr)
 
-years <- 2014:2021
+years <- 2011:2021
 
 # region PTAT2 -----------------------
 # https://www.ndbc.noaa.gov/station_history.php?station=ptat2
@@ -64,7 +64,8 @@ rcpt2 <- do.call(rbind, rcpt2)
 awrt2h <- list()
 for(year in years) {
   url = paste0("https://www.ndbc.noaa.gov/view_text_file.php?filename=awrt2h",year,".txt.gz&dir=data/historical/stdmet/")
-  raw = read.table(url)
+  raw = tryCatch(read.table(url), error = function(e) return(NULL))
+  if(is.null(raw)) {next}
   names(raw)[1:7] <- c("Year","month","day","hour",'minute', "wind_dir",'windspeed_ms')
   raw$windspeed_ms[raw$windspeed_ms >= 99.0] <- NA
   raw$yearmo <- paste(

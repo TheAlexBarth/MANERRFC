@@ -1,4 +1,4 @@
-# MARK: Plot/Bonus
+
 
 # region \- colorbline ggpalette
 gg_color_hue <- function(n) {
@@ -31,6 +31,50 @@ gg_cbb_col <- function(n) {
   }
   return(cbbPalette[1:n])
 }
+
+# endregion
+
+
+
+# region Groupings -----------------------
+
+regime_cols <- c(
+  Wet = '#004480',
+  Dry = '#D2C49B'
+)
+
+site_factors <- factor(c('CW','CE','AB','MB','SC'), levels = c('CW','CE','AB','MB','SC'))
+
+site_cols = c(
+  `CW` = '#7D5700',
+  `CE` = '#FFB406',
+  `AB` = '#99AF6A',
+  `MB` = '#56B4E9',
+  `SC` = '#0072B2'
+)
+
+size_factors <- factor(c('pico','nano','micro'), levels = c('pico','nano','micro'))
+
+size_cols <- c(
+  `pico` = '#AEE471',
+  `nano` = "#7FB344",
+  `micro` = "#296D00"
+)
+
+troph_factors <- factor(
+  c("diat_auto",'dino_auto','mixotroph','nano_grazer','micro_grazer'),
+  levels = c("diat_auto",'dino_auto','mixotroph','nano_grazer','micro_grazer')
+)
+
+troph_cols <- c(
+  `diat_auto` = '#117733',
+  `dino_auto` = '#44AA99',
+  `mixotroph` = '#88CCEE',
+  `nano_grazer` = '#DDCC77',
+  `micro_grazer` = '#CC6677'
+)
+
+# endregion -----------------------
 
 ################
 # MARK: Posterior Tools
@@ -270,7 +314,37 @@ summarize_pred <- function(mat, detailed = TRUE, quantile = TRUE) {
 
 
 
+# format posterior array to df -----------------------
 
+post_arr_to_df <- function(arr, dim_labs = NULL, dim_levels = list()) {
+
+  dims <- dim(arr)
+  ndim <- length(dims)
+
+  dim_names <- paste0("dim", seq_len(ndim))
+
+  if (!is.null(dim_labs)) {
+    stopifnot(length(dim_labs) == ndim-1)
+    dim_names <- c("iter",dim_labs)
+  }
+
+  df <- as.data.frame.table(arr,responseName = 'est')
+  names(df)[1:ndim] <- dim_names
+
+  df[,1:ndim] <- df[,1:ndim] |> 
+    lapply(as.integer)
+
+  # relabel names
+  for (dim_name in names(dim_levels)) {
+    if (dim_name %in% dim_names) {
+      df[[dim_name]] <- factor(df[[dim_name]], labels = dim_levels[[dim_name]])
+    }
+  }
+  return(df)
+}
+
+
+# endregion -----------------------
 
 
 

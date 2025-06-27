@@ -6,6 +6,7 @@ library(ggplot2)
 library(lubridate)
 library(dplyr)
 library(tidyr)
+source('./R/utils.R')
 
 # data are available from USGS river gauge
 # publically available.
@@ -28,7 +29,7 @@ flow$yearmo <- paste0(year(flow$Date), '-',month(flow$Date), '-01') |>
   as.Date()
 
 discharge <- flow |> 
-  filter(year(Date) %in% c(2014:2021))
+  filter(year(Date) %in% c(2011:2021))
 
 discharge <- discharge |> 
   select(-Site) |> 
@@ -91,4 +92,16 @@ ggplot() +
     aes(x = discharge$Date, color = regime),
     sides = "b",
   ) +
+  scale_color_manual(values = c(blue = 'blue', red = 'red',regime_cols)) + 
   theme_minimal()
+
+odf <- cbind(
+  discharge,
+  riv_pca = river_pca$x[,1],
+  regime = regime
+)
+
+saveRDS(
+  odf,
+  './data/01d-river_regime.RDS'
+)

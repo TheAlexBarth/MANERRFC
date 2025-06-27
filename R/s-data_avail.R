@@ -1,6 +1,7 @@
 rm(list = ls())
 library(lubridate)
 
+# need to update to reflect data availabilty from CHL-a AND flowcam
 etx <- readRDS('./data/02-full_merged.rds')
 
 
