@@ -1,11 +1,3 @@
-// Revised to only include count predictors
-// generalized script to build mixture model of count/biomass models
-// Structured as hierachcial with intent of species but may be useful for analysis with sites,etc
-// hierarchy is one-level only where N_groups are compared 
-// N_groups must be the same for both models but are fed in separately as numeric group_xxx
-
-// note that I wrote paper with mu_beta for hyperpriors but in code use theta for hyperpriors
-// whoops
 data {
     // format
     int<lower=0> N_obs; // sampling observations

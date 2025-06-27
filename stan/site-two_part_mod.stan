@@ -1,121 +1,102 @@
 // Revised to only include count predictors
-// generalized script to build mixture model of count/biomass models
-// Structured as hierachcial with intent of species but may be useful for analysis with sites,etc
-// hierarchy is one-level only where N_groups are compared 
-// N_groups must be the same for both models but are fed in separately as numeric group_xxx
+// assumes a possion regression for counts
+// just a normal distribution to estimate biomass of trophic groups.
 
-// note that I wrote paper with mu_beta for hyperpriors but in code use theta for hyperpriors
-// whoops
 data {
-    // format
+    // constants
     int<lower=0> N_obs; // sampling observations
     int<lower=0> N_mes; // individual measurements
-    int<lower=0> N_groups; // number of groups
-    int N_site;
-
-    // response inputs
-    array[N_obs] int n; // n_counts
-    vector[N_mes] log_b; // biomass of individuals (logged)
-
-    // predictor inputs
-    int<lower=0> K_count; // count preds
-    vector[N_obs] img_vol; // imaging volume offset
-    matrix[N_obs, K_count] X_count;
-
-    // group factor
-    array[N_obs] int group_counts; // factor id
-    array[N_mes] int group_bio;
-    array[N_site] int group_site;
-
-
-    // programmable priors
-    real theta_b_mu; // prior on theta_b
-    real theta_b_sig; // prior var for theta_b
-    real tau_b_mu; // uniform lower
-    real tau_b_sig; // uniform higher
+    int<lower=0> K_role; // number of functional roles
+    int<lower=0> K_taxo; // number of taxonomic/morphologic groups
+    int<lower=0> K_site;
+    int<lower=0> K_x; // INCLUDE chlorophyll predictors
+    // data terms
+    array[N_obs] int n; // counts of individuals
+    vector[N_obs] img_vol;
+    matrix[N_obs, K_x] W; // chlorophyll MUST BE LAST
+    vector[N_mes] b;
+    // indexing
+    array[N_obs] int role;
+    array[N_obs] int site;
+    array[N_obs] int incld_chl;
+    array[K_taxo] int taxo_role; //mapping role to taxo for prior
+    array[N_mes] int taxo;
 }
 
 parameters {
-    // count model hyperparams
-    vector[K_count] theta_count;
-    vector<lower=0>[K_count] tau_count;
-    // biomass mod hypers
-    real theta_bio;
-    real<lower=0> tau_bio;
+    // pois reg
+    vector[K_role] gamma;
+    array[K_role, K_site, K_x] real alpha;
+    matrix[K_role, K_x] mu_alpha;
+    matrix<lower=0>[K_role, K_x] sigma_alpha;
 
-    // group-level counts covars
-    matrix[N_groups, K_count] beta_count;
-    vector[N_site] beta_site;
-    vector[N_groups] mu_bio;
-    // biomass obs
-    real<lower=1e-6> sigma_bio;
-    // count vars
-    real<lower=1e-6> phi;
+    // normal mod
+    vector<lower=0>[K_taxo] sigma_g;
+    vector<lower=0>[K_taxo] eta_g; // group mean
+    vector<lower=0>[K_role] eta_r; // role mean
+    vector<lower=0>[K_role] sigma_r;
 }
 
 model {
-    // hyperpriors
-    theta_count ~ normal(0, 1);
-    tau_count ~ normal(1,2);
-    theta_bio ~ normal(theta_b_mu, theta_b_sig);// need to set to scale of data
-    tau_bio ~ normal(tau_b_mu, tau_b_sig); // set to scale of data
-    phi ~ gamma(2, 0.1); 
-
-
-    // group priors
-    for (k in 1:K_count) {
-        beta_count[, k] ~ normal(theta_count[k], tau_count[k]);
-    }
-    beta_site ~ normal(3,1);
-
-    for(k in 1:N_groups) {
-        mu_bio[k] ~ normal(theta_bio, tau_bio);
+    // count model
+    gamma[] ~ gamma(2, 0.01);
+    // --- priors ------
+    for(k in 1:K_x) {
+        mu_alpha[,k] ~ normal(0, 2);
+        sigma_alpha[,k] ~ inv_gamma(2,1);
+        for(s in 1:K_site) {
+            alpha[,s,k] ~ normal(mu_alpha[,k], sigma_alpha[,k]);
+        }
     }
 
-    // count data model
-    for (i in 1:N_obs) {
-        real log_lambda = beta_site[group_site[i]] +
-        dot_product(beta_count[group_counts[i]], X_count[i,]) + 
-        log(img_vol[i]);
-        
-        n[i] ~ neg_binomial_2_log(log_lambda, phi);
+    // --- data model ----
+    for(i in 1:N_obs) {
+        real log_lambda = dot_product(W[i,:K_x-4], to_vector(alpha[role[i], site[i],:K_x-4])) + 
+            log(img_vol[i]) +
+            incld_chl[i] * dot_product(W[i,K_x-3:], to_vector(alpha[role[i], site[i],K_x-3:]));
+            ;
+        n[i] ~ neg_binomial_2_log(log_lambda, gamma[role[i]]);
     }
 
-    // biomass data model
-    for (i in 1:N_mes) {
-        log_b[i] ~ normal(mu_bio[group_bio[i]], sigma_bio);
+    // biomass model
+    // this is where stan syntax sucks
+    // -- prior ---
+    sigma_g[] ~ normal(0,10^5);
+    eta_r ~ normal(10^4, 10^3);
+    sigma_r ~ normal(0, 10^5);
+    for(g in 1:K_taxo) { //yuck
+        eta_g[g] ~ normal(eta_r[taxo_role[g]], sigma_r[taxo_role]);
+    }
+
+    // -- data model ----
+    for(i in 1:N_mes) {
+        eta_g[i] ~ normal(eta_r[taxo[i]], sigma_r[taxo[i]]);
     }
 }
 
 generated quantities {
-    real MSE_obs_n = 0;
-    real MSE_mod_n = 0;
-    real MSE_obs_b = 0;
-    real MSE_mod_b = 0;
+    real MSE_obs = 0;
+    real MSE_mod = 0;
+    real dev_obs = 0;
+    real dev_mod = 0;
  
-    for(i in 1:N_obs){
-
-        real log_lambda = dot_product(beta_count[group_counts[i]], X_count[i]) + log(img_vol[i]);
-        int n_tilde = neg_binomial_2_log_rng(log_lambda, phi);
-
-        //note to self here - group_counts[i] needs to match the right index for
-        // this all to work!!
-        // noticed this error and should re-check the pvalue calcs with negbin vs pois
-
-        MSE_obs_n += square(n[i] - exp(log_lambda));
-        MSE_mod_n += square(n_tilde - exp(log_lambda));
-
-
+    for (i in 1:N_obs) {
+        real log_lambda = dot_product(W[i,:K_x-4], to_vector(alpha[role[i], site[i],:K_x-4])) +
+                          log(img_vol[i]) +
+                          incld_chl[i] * dot_product(W[i,K_x-3:], to_vector(alpha[role[i], site[i],K_x-3:]));
+        
+        // Sample posterior predictive
+        int n_sim = neg_binomial_2_rng(exp(log_lambda), gamma[role[i]]);
+    
+        // MSE (squared error between data and posterior predictive mean)
+        MSE_obs += square(n[i] - exp(log_lambda));
+        MSE_mod += square(n_sim - exp(log_lambda));
     }
 
     for(i in 1:N_mes) {
-        real b_tilde = normal_rng(mu_bio[group_bio[i]], sigma_bio);
-        MSE_obs_b += square(log_b[i] - mu_bio[group_bio[i]]);
-        MSE_mod_b += square(b_tilde - mu_bio[group_bio[i]]);
-    }
+        real b_sim = normal_rng(eta_g[taxo[i]], sigma_g[taxo[i]]);
 
-    MSE_obs_n /= N_obs;
-    MSE_mod_n /= N_obs;
-    MSE_obs_b /= N_mes;
-    MSE_mod_b /= N_mes;
+        dev_obs += -2 * normal_lpdf(b[i] | eta_g[taxo[i]], sigma_g[taxo[i]]);
+        dev_mod += -2 * normal_lpdf(b_sim | eta_g[taxo[i]], sigma_g[taxo[i]]);
+    }
 }
