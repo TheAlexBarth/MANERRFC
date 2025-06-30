@@ -15,6 +15,8 @@ wind <- readRDS('./data/01c-wind_score.RDS')
 
 # region \- merge conc ----------
 
+# temp convert trophic role
+etx$conc$functional_role[which(grepl('grazer',etx$conc$functional_role))] <- 'grazer'
 
 #attach variates to each concentration. Start with All
 
@@ -52,9 +54,8 @@ indv_clean <- etx$indv |>
     yearmo, functional_role, um3, cmass, group, taxo_name, sample_site
   )
 
-indv_clean$functional_role <- factor(indv_clean$functional_role, levels = levels(troph_factors))
-indv_clean$taxo_name <- factor(indv_clean$taxo_name, levels = unique(indv_clean$taxo_name))
- 
+indv_clean$functional_role[which(grepl('grazer',indv_clean$functional_role))] <- 'grazer'
+
 saveRDS(
   list(
     conc = troph_conc,

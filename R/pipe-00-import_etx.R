@@ -108,6 +108,7 @@ living$um3 <- (4/3) * pi * (living$abd_diameter/2)^3
 
 living$cmass <- NA
 # dinoflagellates
+stop("change to base 10 mendenduer")
 living$cmass[which(
   living$group == "dinoflagellates"
 )] <- exp(-0.353) * living$um3[which(living$group == "dinoflagellates")]^0.864

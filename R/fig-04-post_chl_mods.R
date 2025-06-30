@@ -12,7 +12,7 @@ post_chl <- readRDS('./data/03-post_chl.RDS')
 
 
 amp = sqrt(post_chl$beta[,,,2]^2 + post_chl$beta[,,,3]^2)
-beta_main <- post_chl$beta[,,,-c(1,2)] # drop sin term
+beta_main <- post_chl$beta[,,,-c(1,2)] # drop sin term and intecept
 beta_main[,,,1] <- amp # replace cos with amp
 
 

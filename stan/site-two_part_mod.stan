@@ -25,7 +25,7 @@ data {
 
 parameters {
     // pois reg
-    vector[K_role] gamma;
+    vector<lower=0>[K_role] gamma;
     array[K_role, K_site, K_x] real alpha;
     matrix[K_role, K_x] mu_alpha;
     matrix<lower=0>[K_role, K_x] sigma_alpha;
@@ -51,9 +51,9 @@ model {
 
     // --- data model ----
     for(i in 1:N_obs) {
-        real log_lambda = dot_product(W[i,:K_x-4], to_vector(alpha[role[i], site[i],:K_x-4])) + 
+        real log_lambda = dot_product(W[i,1:(K_x-3)], to_vector(alpha[role[i], site[i],1:(K_x-3)])) + 
             log(img_vol[i]) +
-            incld_chl[i] * dot_product(W[i,K_x-3:], to_vector(alpha[role[i], site[i],K_x-3:]));
+            incld_chl[i] * dot_product(W[i,(K_x-2):K_x], to_vector(alpha[role[i], site[i],(K_x-2):K_x]));
             ;
         n[i] ~ neg_binomial_2_log(log_lambda, gamma[role[i]]);
     }
@@ -61,16 +61,16 @@ model {
     // biomass model
     // this is where stan syntax sucks
     // -- prior ---
-    sigma_g[] ~ normal(0,10^5);
-    eta_r ~ normal(10^4, 10^3);
-    sigma_r ~ normal(0, 10^5);
+    sigma_g[] ~ exponential(1);;
+    eta_r ~ normal(1e4, 1e4);
+    sigma_r ~ exponential(1);;
     for(g in 1:K_taxo) { //yuck
-        eta_g[g] ~ normal(eta_r[taxo_role[g]], sigma_r[taxo_role]);
+        eta_g[g] ~ normal(eta_r[taxo_role[g]], sigma_r[taxo_role[g]]);
     }
 
     // -- data model ----
     for(i in 1:N_mes) {
-        eta_g[i] ~ normal(eta_r[taxo[i]], sigma_r[taxo[i]]);
+        b[i] ~ normal(eta_g[taxo[i]], sigma_g[taxo[i]]);
     }
 }
 
