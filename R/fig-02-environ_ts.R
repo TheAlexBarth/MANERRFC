@@ -3,6 +3,7 @@ library(ggplot2)
 library(lubridate)
 library(dplyr)
 library(ggpubr)
+source('./R/utils.R')
 
 # region Get Date Range -----------------------
 
@@ -15,166 +16,144 @@ rm(etx)
 
 
 
-# region \- environmental data --------------------------
+# region \- prep data data --------------------------
 
-
-environ <- readRDS("./data/01-environ_clean.rds")
-
-environ$wind_avg$yearmo <- make_yearmo(environ$wind_avg)
-environ$wind_avg <- environ$wind_avg |> filter(yearmo %in% date_seq)
-
-wind <- environ$wind_avg |> 
-  group_by(yearmo) |> 
-  summarize(
-    wind = mean(windspeed, na.rm = TRUE),
-    PAR = mean(TotalPAR, na.rm = TRUE)
-  )
-
-
-# water quality -
-environ$wq_sum$yearmo <- make_yearmo(environ$wq_sum)
-environ$wq_sum <- environ$wq_sum |> filter(environ$wq_sum$yearmo %in% date_seq)
-
-wq_sum <- environ$wq_sum |> 
-  group_by(yearmo, sample_site) |> 
-  summarize(
-    temp = mean(t, na.rm = TRUE),
-    sal = mean(sal, na.rm = TRUE),
-  )
-
-
-# chla lab-based measurement
-environ$nut_avg$yearmo <- as.Date(
-  paste(year(environ$nut_avg$date), month(environ$nut_avg$date), '01', sep = '-')
-)
-
-environ$nut_avg <- environ$nut_avg |> 
-  filter(yearmo %in% date_seq)
-
-chla_avg <- environ$nut_avg |> 
-  group_by(yearmo, sample_site) |> 
-  summarize(chl  = mean(CHLA_N, na.rm = TRUE))
+swmp <- readRDS("./data/01a-swmp_wq_data.rds")
+swmp <- swmp[which(year(swmp$yearmo) %in% c(2014:2021)),]
+swmp$sampling_site <- factor(swmp$sampling_site, levels(site_factors))
+wind <- readRDS('./data/01c-wind_score.RDS')
+wind <- wind[which(year(wind$yearmo) %in% c(2014:2021)),]
+regime <- readRDS('./data/01d-river_regime.RDS')
+regime <- regime[which(year(regime$yearmo) %in% c(2014:2021)),]
 
 
 # endregion
 
 # region Plot TS -----------------------
 
-ggplot(wind) +
+regime_plot <- ggplot(regime) +
   geom_line(
     aes(
-      x = yearmo,
-      y = wind
-    )
+      x = Date,
+      y = Aransas,
+      color = "Aransas"
+    ),
   ) +
-  theme_pubclean()
-
-ggplot(chla_avg) +
   geom_line(
     aes(
-      x = yearmo,
-      y = chl,
-      color = sample_site
-    )
+      x = Date,
+      y = Mission,
+      color = 'Mission'
+    ),
   ) +
-  theme_pubclean()
-
-ggplot() +
-  geom_line(
-    data = wq_sum,
+  geom_rug(
     aes(
-      x = yearmo,
-      y = sal,
-      color = sample_site
+      x = Date,
+      color = regime
     )
-  ) +
-  # geom_rug(
-  #   aes(x = discharge$Date, color = regime),
-  #   sides = "b",
-  # ) +
-  theme_pubclean()
-
-ggplot(wq_sum) +
-  geom_line(
-    aes(
-      x = yearmo,
-      y = temp,
-      color = sample_site
-    )
-  ) +
-  theme_pubclean()
-
-ggplot(wq_sum) +
-  geom_line(
-    aes(
-      x = yearmo,
-      y = do,
-      color = sample_site
-    )
-  ) +
-  theme_pubclean()
-
-ggplot(wq_sum) +
-  geom_line(
-    aes(
-      x = yearmo,
-      y = turb,
-      color = sample_site
-    )
-  ) +
-  theme_pubclean()
-
-
+  )+
+  scale_color_manual(values = c(
+    `Aransas` = "#01086b", `Mission` = '#979df7',
+    regime_cols
+  )) +
+  labs(x = "", y = "Discharge [CuFt/s]", color = "")+
+  theme_pubclean(base_size = 7)+
+  theme(legend.position = 'top')
 
 # endregion -----------------------
 
 
+# region \- wind---------------
+
+wind_plot <- ggplot() +
+  geom_line(
+    data = wind,
+    aes(
+      x = yearmo,
+      y = ptat_wind_ms,
+      linetype = 'PTAT'
+    )
+  ) +
+  geom_line(
+    data = wind,
+    aes(
+      x = yearmo,
+      y = rcpt_wind_ms,
+      linetype = 'RCPT'
+    )
+  ) +  
+  geom_line(
+    data = wind,
+    aes(
+      x = yearmo,
+      y = awrt_wind_ms,
+      linetype = 'AWRT'
+    )
+  ) +
+  geom_line(
+    data = wind,
+    aes(
+      x = yearmo,
+      y = wind_pca,
+      linetype = 'Wind Score (1st Eigenvalue)'
+    )
+  ) +
+  scale_linetype_manual(
+    values = c(
+      `PTAT` = 'twodash',`RCPT` = 'dashed', `AWRT` = "dotdash",
+      `Wind Score (1st Eigenvalue)` = 'solid'
+    )
+  ) +
+  labs(x = "", y = 'Wind Speed [m/s]', linetype = "")+ 
+  theme_pubclean(base_size = 7)
+  
+# endregion
+
+# region \- swmp plots -----------------
+
+swmp_plotter <- function(var, ylab) {
+  p = ggplot(swmp) +
+    geom_line(
+      aes(
+        x = yearmo,
+        y = .data[[var]],
+        color = sampling_site
+      )
+    )+
+    scale_color_manual(values = site_cols) +
+    labs(x = "", y = ylab, color = "")+
+    theme_pubclean(base_size = 7)
+  return(p)
+}
+
+temp_plot <- swmp_plotter('temp','Temperature [deg.C]')
+sal_plot <- swmp_plotter('sal','Salinity')
+P_plot <- swmp_plotter('P','PO4') 
+NH4 <- swmp_plotter('NH4','NH4')
+N <- swmp_plotter('N','NO23')
+
+# endregion
 
 
-# region Supplemental Seasonality -----------------------
+# region \- full plot -------------------------------------
 
-# possibly better to do averages and look at it all that way
-plot(
-  y = environ$wq_sum$t,
-  x = yday(environ$wq$date),
-  col = as.factor(environ$wq_sum$sample_site),
-  pch = 16
+full_plot <- ggarrange(
+  regime_plot + theme(plot.margin = unit(c(0,.2,0,0.2), 'lines')),
+  wind_plot + theme(plot.margin = unit(c(0,.2,0,0.2), 'lines')),
+  temp_plot + theme(plot.margin = unit(c(0,.2,0,0.2), 'lines')),
+  sal_plot + theme(plot.margin = unit(c(0,.2,0,0.2), 'lines')),
+  P_plot + theme(plot.margin = unit(c(0,.2,0,0.2), 'lines')),
+  NH4 + theme(plot.margin = unit(c(0,.2,0,0.2), 'lines')),
+  N + theme(plot.margin = unit(c(0,.2,0,0.2), 'lines')),
+  ncol = 1,
+  align = 'v'
 )
 
-plot(
-  y = environ$wq_sum$DO,
-  x = yday(environ$wq$date),
-  col = as.factor(environ$wq_sum$sample_site),
-  pch = 16
+
+ggsave(
+  './output/fig02-environ.pdf',full_plot,
+  height = 270, width = 170,
+  units = 'mm', dpi = 600
 )
 
-plot(
-  y = environ$wq_sum$sal,
-  x = yday(environ$wq$date),
-  col = as.factor(environ$wq_sum$sample_site),
-  pch = 16
-)
-
-
-plot(
-  x = yday(environ$nut_avg$date),
-  y = environ$nut_avg$CHLA_N,
-  col = as.factor(environ$nut_avg$sample_site),
-  pch = 16
-)
-
-
-plot(
-  x = yday(environ$wind_avg$date),
-  y = environ$wind_avg$windspeed,
-  pch = 16
-)
-
-plot(
-  x = yday(environ$wind_avg$date),
-  y = environ$wind_avg$TotalPAR,
-  pch = 16
-)
-
-
-# endregion -----------------------
+# endregion
