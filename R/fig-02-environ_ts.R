@@ -14,33 +14,6 @@ rm(etx)
 # endregion -----------------------
 
 
-# region \- prep drought data ---------------------
-
-aransas_droguht <- read.csv("./data/dm_aransas.csv")
-refugio_drought <- read.csv("./data/dm_refugio.csv")
-
-
-full_drought <- rbind(aransas_droguht, refugio_drought)
-
-full_drought$dm_score <- full_drought[,3:ncol(full_drought)] |> 
-  apply(1, function(x) sum(x)/100)
-
-
-dm_total <- full_drought |> 
-  group_by(
-    yearmo = as.Date(paste(year(period), month(period), '01', sep = '-'))
-  ) |> 
-  summarize(
-    dm = mean(dm_score)
-  ) |> 
-  filter(
-    yearmo %in% date_seq
-  )
-
-dm_total$drought <- dm_total$dm >=1
-
-# endregion
-
 
 # region \- environmental data --------------------------
 
@@ -67,8 +40,6 @@ wq_sum <- environ$wq_sum |>
   summarize(
     temp = mean(t, na.rm = TRUE),
     sal = mean(sal, na.rm = TRUE),
-    do = mean(DO, na.rm = TRUE),
-    turb = mean(Turb, na.rm = TRUE)
   )
 
 
@@ -89,29 +60,11 @@ chla_avg <- environ$nut_avg |>
 
 # region Plot TS -----------------------
 
-ggplot(dm_total) + 
-  geom_line(
-    aes(
-      x = yearmo,
-      y = dm
-    )
-  ) +
-  theme_pubclean()
-
 ggplot(wind) +
   geom_line(
     aes(
       x = yearmo,
       y = wind
-    )
-  ) +
-  theme_pubclean()
-
-ggplot(wind) +
-  geom_line(
-    aes(
-      x = yearmo,
-      y = PAR
     )
   ) +
   theme_pubclean()

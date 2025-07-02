@@ -7,6 +7,7 @@ library(tidyr)
 source('./R/utils.R')
 post_role <- readRDS('./data/04-post_micro.RDS')
 
+
 # region Summarize Effects -----------------------
 
 # amp = sqrt(post_role$alpha[,,,2]^2 + post_role$alpha[,,,3]^2)
@@ -111,7 +112,7 @@ full_plot <- ggarrange(
   common.legend = TRUE,
   legend = 'bottom'
 )
-ggsave('./output/fig06-troph_effects.pdf',plot = full_plot, width = 85, height = 120, units = 'mm')
+ggsave('./output/fig06-troph_effects.pdf',plot = full_plot, width = 170, height = 120, units = 'mm')
 
 
 # endregion -----------------------
