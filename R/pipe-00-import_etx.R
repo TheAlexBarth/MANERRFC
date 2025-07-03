@@ -23,7 +23,7 @@ raw <- read_etx(paste0(path,'/2025_06-revised.tsv'))
 raw$sample_site <- raw$sample_site |> toupper()
 raw <- raw |> filter(sample_id != 'AB_2011-03-08', abd_diameter >= 20)
 
-taxo_map <- read.csv('./data/00-taxo_map.csv')
+taxo_map <- read.csv('./data/xx-taxo_map.csv')
 
 ######################################################
 # MARK: Ecotaxa Format ---------------------------
@@ -108,26 +108,25 @@ living$um3 <- (4/3) * pi * (living$abd_diameter/2)^3
 
 living$cmass <- NA
 # dinoflagellates
-stop("change to base 10 mendenduer")
 living$cmass[which(
   living$group == "dinoflagellates"
-)] <- exp(-0.353) * living$um3[which(living$group == "dinoflagellates")]^0.864
+)] <- 10^(-0.353) * living$um3[which(living$group == "dinoflagellates")]^0.864
 
 #little diatoms
 living$cmass[which(
   living$group == "diatom" & living$um3 <3000
-)] <- exp(-0.541)*living$um3[which(living$group == "diatom" & living$um3 <3000)]^0.811
+)] <- 10^(-0.541)*living$um3[which(living$group == "diatom" & living$um3 <3000)]^0.811
 
 #big diatoms
 living$cmass[which(
   living$group == "diatom" & living$um3 >3000
-)] <- exp(-0.933)*living$um3[which(living$group == "diatom" & living$um3 >3000)]^0.881
+)] <- 10^(-0.933)*living$um3[which(living$group == "diatom" & living$um3 >3000)]^0.881
 
 # loricated ciliates
-living$cmass[which(living$group == "lor_ciliate")] <- exp(-0.168)*living$um3[which(living$group == "lor_ciliate")]^0.841
+living$cmass[which(living$group == "lor_ciliate")] <- 10^(-0.168)*living$um3[which(living$group == "lor_ciliate")]^0.841
 
 # non-loricated ciliates
-living$cmass[which(living$group == "nl_ciliate")] <- exp(-0.639)*living$um3[which(living$group == "nl_ciliate")]^0.984
+living$cmass[which(living$group == "nl_ciliate")] <- 10^(-0.639)*living$um3[which(living$group == "nl_ciliate")]^0.984
 
 # NOTE THERE IS A LOT OF NAs LEFT FOR NONFOCUS CATEGORES --WILL BE REMOVED
 

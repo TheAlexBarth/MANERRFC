@@ -82,22 +82,71 @@ for(frac in size_factors) {
 }
 
 
-ggplot() +
-  geom_error_range(
-    x = ts_list$micro$SC$yearmo,
-    df = ts_list$micro$SC,
-    color = size_cols['micro']
-  )+
-  geom_point(
-    data = post_chl$data$all_data |> 
-      filter(frac == 'micro', site == 'SC'),
-    aes(
-      x = yearmo,
-      y = ugL_chl
-    )
-  )+
-  theme_pubclean()
 
+ts_plotter <- function(psite) {
+
+  micro <- ggplot() +
+    geom_error_range(
+      x = ts_list$micro[[psite]]$yearmo,
+      df = ts_list$micro[[psite]],
+      color = size_cols['micro']
+    )+
+    geom_point(
+      data = post_chl$data$all_data |> 
+        filter(frac == 'micro', site == psite),
+      aes(
+        x = yearmo,
+        y = ugL_chl
+      )
+    )+
+    labs(x = "", y = 'Micro ugLChl / L', subtitle = psite)+
+    theme_pubclean()
+
+  nano <- ggplot() +
+    geom_error_range(
+      x = ts_list$nano[[psite]]$yearmo,
+      df = ts_list$nano[[psite]],
+      color = size_cols['nano']
+    )+
+    geom_point(
+      data = post_chl$data$all_data |> 
+        filter(frac == 'nano', site == psite),
+      aes(
+        x = yearmo,
+        y = ugL_chl
+      )
+    )+
+    labs(x = "", y = 'Nano ugLChl / L')+
+    theme_pubclean()
+  pico <- ggplot() +
+    geom_error_range(
+      x = ts_list$pico[[psite]]$yearmo,
+      df = ts_list$pico[[psite]],
+      color = size_cols['pico']
+    )+
+    geom_point(
+      data = post_chl$data$all_data |> 
+        filter(frac == 'pico', site == psite),
+      aes(
+        x = yearmo,
+        y = ugL_chl
+      )
+    )+
+    labs(x = "", y = 'Pico ugLChl / L')+
+    theme_pubclean()
+  
+  return(
+    ggarrange(
+      micro, nano, pico, ncol = 1
+    )
+  )  
+}
+
+pdf('./output/s-post_chl_ts_mod.pdf')
+for(site in site_factors) {
+  print(ts_plotter(site))  
+}
+dev.off()
 
 # endregion -----------------------
 
@@ -185,49 +234,58 @@ for(var in names(post_chl$data$X_scaled)[-c(1:3)]) {
 
 # endregion -----------------------
 
-ggplot(
-  marg_list[[var]] |> 
-    mutate(
-      site = factor(site, levels = site_factors)
-    )
-) +
-  geom_ribbon(
-    aes(
-      x =  marg_list[[var]][[var]],
-      ymin = low.95,
-      ymax = high.95,
-      fill = frac
-    ),
-    alpha = 0.5
+marg_plotter <- function(var) {
+  ggplot(
+    marg_list[[var]] |> 
+      mutate(
+        site = factor(site, levels = site_factors)
+      )
   ) +
-  geom_ribbon(
-    aes(
-      x =  marg_list[[var]][[var]],
-      ymin = low.75,
-      ymax = high.75,
-      fill = frac
-    ),
-    alpha = 0.5
-  ) +
-  geom_ribbon(
-    aes(
-      x =  marg_list[[var]][[var]],
-      ymin = low.50,
-      ymax = high.50,
-      fill = frac
-    ),
-    alpha = 0.5
-  ) +
- 
-  facet_grid(
-    site ~ frac
-  ) +
-  scale_fill_manual(
-    values = size_cols
-  )+
-  guides(fill = 'none')+
-  labs(x = var, y = expression(paste("Chl-a ", "[",mu * g~L^{-1},"]")))+
-  theme_pubclean() +
-  theme(strip.background = element_rect(fill = 'transparent'))
+    geom_ribbon(
+      aes(
+        x =  marg_list[[var]][[var]],
+        ymin = low.95,
+        ymax = high.95,
+        fill = frac
+      ),
+      alpha = 0.5
+    ) +
+    geom_ribbon(
+      aes(
+        x =  marg_list[[var]][[var]],
+        ymin = low.75,
+        ymax = high.75,
+        fill = frac
+      ),
+      alpha = 0.5
+    ) +
+    geom_ribbon(
+      aes(
+        x =  marg_list[[var]][[var]],
+        ymin = low.50,
+        ymax = high.50,
+        fill = frac
+      ),
+      alpha = 0.5
+    ) +
+  
+    facet_grid(
+      site ~ frac
+    ) +
+    scale_fill_manual(
+      values = size_cols
+    )+
+    guides(fill = 'none')+
+    labs(x = var, y = expression(paste("Chl-a ", "[",mu * g~L^{-1},"]")))+
+    theme_pubclean() +
+    theme(strip.background = element_rect(fill = 'transparent'))
+}
 
 # endregion -----------------------
+
+
+pdf('./output/s-post_chl_margs.pdf')
+for(var in c('month',names(post_chl$data$X_scaled[,-c(1:3)]))) {
+  marg_plotter(var) |> print()
+}
+dev.off()

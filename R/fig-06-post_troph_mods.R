@@ -33,8 +33,6 @@ alpha_sum <- alpha_df |>
 
 
 clean_names <- c(
-  sin = 'sin_term',
-  cos = 'cos_term',
   wind_pca = 'Wind',
   temp = 'Temperature',
   sal = 'Salinity',
