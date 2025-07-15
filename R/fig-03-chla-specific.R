@@ -3,6 +3,7 @@ library(ggplot2)
 library(ggpubr)
 library(dplyr)
 library(tidyr)
+library(lubridate)
 
 source('./R/utils.R')
 
@@ -45,6 +46,7 @@ site_chl_plot <- function(loc) {
       x = "", y = expression(paste("Chl-a ", "[",mu * g~L^{-1},"]")), 
       fill = "", subtitle = loc
     )+
+    scale_y_continuous(limits = c(0,30))+
     theme_pubclean(base_size = 8)
   return(plt)
 }
@@ -58,7 +60,8 @@ outplot <- ggarrange(
   plotlist = all_plots,
   ncol = 1,
   common.legend = TRUE,
-  legend = 'bottom'
+  legend = 'bottom',
+  labels = LETTERS
 )
 
 ggsave(

@@ -62,15 +62,15 @@ size_cols <- c(
 )
 
 troph_factors <- factor(
-  c("diat_auto",'dino_auto','mixotroph','grazer'),
-  levels = c("diat_auto",'dino_auto','mixotroph','grazer')
+  c("diat_auto",'dino_auto','mixotroph','heterotroph'),
+  levels = c("diat_auto",'dino_auto','mixotroph','heterotroph')
 )
 
 troph_cols <- c(
   `diat_auto` = '#117733',
   `dino_auto` = '#44AA99',
   `mixotroph` = '#88CCEE',
-  `grazer` = '#DDCC77'
+  `heterotroph` = '#DDCC77'
 )
 
 # endregion -----------------------

@@ -146,7 +146,8 @@ full_plot <- ggarrange(
   NH4 + theme(plot.margin = unit(c(0,.2,0,0.2), 'lines')),
   N + theme(plot.margin = unit(c(0,.2,0,0.2), 'lines')),
   ncol = 1,
-  align = 'v'
+  align = 'v',
+  labels = LETTERS
 )
 
 

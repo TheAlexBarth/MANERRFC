@@ -145,7 +145,8 @@ sc_site <- season_site("SC")
 seasonal_time <- ggarrange(
   cw_site, ce_site, ab_site, mb_site, sc_site,
   ncol = 1,
-  common.legend = T, align = 'v'
+  common.legend = T, align = 'v',
+  labels = LETTERS
 )
 ggsave(
   './output/s-seasonal_numeric_mean.pdf',seasonal_time,

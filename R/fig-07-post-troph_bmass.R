@@ -97,7 +97,8 @@ full_plot <- ggarrange(
   sc_plot,
   ncol = 1,
   align = 'v',
-  common.legend = T
+  common.legend = T,
+  labels = LETTERS
 )
 
 ggsave(
@@ -161,7 +162,8 @@ full_mplot <- ggarrange(
   sc_mplot,
   ncol = 1,
   align = 'v',
-  common.legend = T
+  common.legend = T,
+  labels = LETTERS
 )
 
 ggsave(

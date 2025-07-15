@@ -16,7 +16,6 @@ wind <- readRDS('./data/01c-wind_score.RDS')
 # region \- merge conc ----------
 
 # temp convert trophic role
-etx$conc$functional_role[which(grepl('grazer',etx$conc$functional_role))] <- 'grazer'
 
 #attach variates to each concentration. Start with All
 

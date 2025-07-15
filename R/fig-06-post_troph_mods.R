@@ -97,7 +97,7 @@ alpha_plot <- function(trrole) {
 diat_auto = alpha_plot('diat_auto')
 dino_auto = alpha_plot('dino_auto')
 mixotroph = alpha_plot('mixotroph')
-grazer = alpha_plot('grazer')
+het = alpha_plot('heterotroph')
 
 
 
@@ -105,10 +105,11 @@ full_plot <- ggarrange(
   diat_auto + theme(axis.text.x = element_text(color = 'transparent')), 
   dino_auto + theme(axis.text.x = element_text(color = 'transparent')),
   mixotroph + theme(axis.text.x = element_text(color = 'transparent')),
-  grazer,
+  het,
   ncol = 1, align = 'v',
   common.legend = TRUE,
-  legend = 'bottom'
+  legend = 'bottom',
+  labels = LETTERS
 )
 ggsave('./output/fig06-troph_effects.pdf',plot = full_plot, width = 170, height = 120, units = 'mm')
 

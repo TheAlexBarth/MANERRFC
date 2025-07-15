@@ -11,16 +11,16 @@ post_chl <- readRDS('./data/03-post_chl.RDS')
 # region  Summarize effects -----------------------
 
 
-amp = sqrt(post_chl$beta[,,,2]^2 + post_chl$beta[,,,3]^2)
-beta_main <- post_chl$beta[,,,-c(1,2)] # drop sin term and intecept
-beta_main[,,,1] <- amp # replace cos with amp
+# amp = sqrt(post_chl$beta[,,,2]^2 + post_chl$beta[,,,3]^2)
+beta_main <- post_chl$beta[,,,-c(1,2,3)] # drop sin term and intecept and cos
+# beta_main[,,,1] <- amp # replace cos with amp
 
 
 
 group_levels = list(
   'frac' = levels(size_factors), 
   'site' = levels(site_factors), 
-  'x' = c('seasonal', names(post_chl$data$X_scaled[,-c(1,2,3)]))
+  'x' = c(names(post_chl$data$X_scaled[,-c(1,2,3)]))
 )
 
 beta_df <- post_arr_to_df(beta_main, c('frac','site','x'), dim_levels = group_levels)
@@ -77,7 +77,8 @@ beta_plot <- function(size_frac) {
     theme(
       axis.title.y = element_text(margin = margin(r = 4)),
       plot.margin = margin(2, 2, 2, 2)
-    )
+    ) +
+    scale_y_continuous(limits = c(-2.12,2))
   return(p)
 }
 
@@ -95,6 +96,7 @@ full_plot <- ggarrange(
   pico,
   ncol = 1, align = 'v',
   common.legend = TRUE,
-  legend = 'bottom'
+  legend = 'bottom',
+  labels = LETTERS
 )
 ggsave('./output/fig04-chl_effects.pdf',plot = full_plot, width = 85, height = 120, units = 'mm')

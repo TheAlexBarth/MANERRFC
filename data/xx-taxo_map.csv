@@ -1,37 +1,37 @@
 ﻿taxo_name,fomal_name,grouping_level,group,category,trophic_role,functional_role,notes,refs.
-Dinophysis,Dinophysis spp. ,Genera,dinoflagellates,Dino_armored,heterotroph,micro_grazer,somewhat mixotrophic but largely through kleptoplastids; notorious for feeding on mesodinium rubrum but has been shown to feed on other oligotricheas; in few cases no chloroplasts assumed heterotrophs,Tomas et al. (p429); Reguera et al. (2012)
+Dinophysis,Dinophysis spp. ,Genera,dinoflagellates,Dino_armored,heterotroph,heterotroph,somewhat mixotrophic but largely through kleptoplastids; notorious for feeding on mesodinium rubrum but has been shown to feed on other oligotricheas; in few cases no chloroplasts assumed heterotrophs,Tomas et al. (p429); Reguera et al. (2012)
 Gonyaulacales,Gonyaulacales,Order,dinoflagellates,Dino_armored,autotrophic,dino_auto,encompasses Alexandrium and Gonaulax generas,"Tomas (p448,507)"
 Akashiwo,Akashiwo sanguinea,Species,dinoflagellates,Dino_unarmored,mixotrophic,mixotroph,formely Gymnodinium sanguinea,Tomas (p451);  Bockstahler et l. 1993
 Cochlodinium,Margalefadinium polykrikoides,Species,dinoflagellates,Dino_unarmored,autotrophic,dino_auto,aka Cochlodinium polykrikoides,Tomas (p446); Gobler et al. 2021
 Gymnodiniaceae X,Gymnodiniales,Order,dinoflagellates,Dino_unarmored,autotrophic,dino_auto,categorized as larger bodied gymnodinium,Tomas (p445)
 Gymnodinium,Gymnodiniales,Order,dinoflagellates,Dino_unarmored,autotrophic,dino_auto,categorized for smaller bodied dinos,Tomas (p445)
-Gyrodinium,Gyrodinium,Genera,dinoflagellates,Dino_unarmored,heterotroph,micro_grazer,distinguished from gymnodinium by sprial band - most likely all spriale? Documented to feed aggressively on Chaetoceros debilis,Tomas (p452); Saito et al. 2006)
+Gyrodinium,Gyrodinium,Genera,dinoflagellates,Dino_unarmored,heterotroph,heterotroph,distinguished from gymnodinium by sprial band - most likely all spriale? Documented to feed aggressively on Chaetoceros debilis,Tomas (p452); Saito et al. 2006)
 Karenia,Karena brevis,Species,dinoflagellates,Dino_unarmored,autotrophic,dino_auto,,
-Katodinium,Katodinium sp.,Genera,dinoflagellates,Dino_armored,heterotroph,micro_grazer,"aka heterocapsca rotundatum, no chloroplasts with very light armor or possibly Lebouridinium glacum?",Tomas (p456); Gómez et al. 2016)
-Warnowia,Warnowia sp.,Genera,dinoflagellates,Din_unarmored,heterotroph,micro_grazer,,Tomas
-Polykrikos sp.,Polykrikos sp.,Genera,dinoflagellates,Dino_unarmored,heterotroph,micro_grazer,noted in carmelo book to feed phagatrophically on a wide range of organisms,Tomas (p457)
+Katodinium,Katodinium sp.,Genera,dinoflagellates,Dino_armored,heterotroph,heterotroph,"aka heterocapsca rotundatum, no chloroplasts with very light armor or possibly Lebouridinium glacum?",Tomas (p456); Gómez et al. 2016)
+Warnowia,Warnowia sp.,Genera,dinoflagellates,Din_unarmored,heterotroph,heterotroph,,Tomas
+Polykrikos sp.,Polykrikos sp.,Genera,dinoflagellates,Dino_unarmored,heterotroph,heterotroph,noted in carmelo book to feed phagatrophically on a wide range of organisms,Tomas (p457)
 Ensiculifera,Ensiculifera mexicana,Species,dinoflagellates,Dino_armored,autotrophic,dino_auto,"Possibly confused with Heterocapsca, Scrippsiella, or Pentapharsodinium, but all are armored autotrophs from Peridiniales","Tomas (p524), Li et al. 2020"
-Protoperidinium,Protoperidinium spp.,Genera,dinoflagellates,Dino_armored,heterotroph,micro_grazer,pallium feeders often on diatoms,Tomas (p538)
-Phalacroma,Phalacroma oxytoxoides,Species,dinoflagellates,Dino_armored,heterotroph,micro_grazer,pallium feeders often on ciliates,Tomas (p442)
+Protoperidinium,Protoperidinium spp.,Genera,dinoflagellates,Dino_armored,heterotroph,heterotroph,pallium feeders often on diatoms,Tomas (p538)
+Phalacroma,Phalacroma oxytoxoides,Species,dinoflagellates,Dino_armored,heterotroph,heterotroph,pallium feeders often on ciliates,Tomas (p442)
 Prorocentrum 01,Prorocentrum spp.,Genera,dinoflagellates,Dino_armored,autotrophic,dino_auto,,Tomas (p420)
 Prorocentrum 01,Prorocentrum spp.,Genera,dinoflagellates,Dino_armored,autotrophic,dino_auto,,Tomas (p420)
 Laboea,Laboea strobila,Species,nl_ciliate,cilitate_mixo,mixotrophic,mixotroph,,Stoekcker et al. 1988; Barua et al. (2024)
 Mesodinium rubrum,Mesodinium rubrum,Species,nl_ciliate,cilitate_mixo,mixotrophic,mixotroph,,
 Tontonia sp,Tontonia spp.,Species,nl_ciliate,cilitate_mixo,mixotrophic,mixotroph,,Alekperov et al. (2008); Gemmell et al. (2015)
-Spirotrichea-1,,Morpho,nl_ciliate,ciliate_graz,heterotroph,nano_grazer,,
-spirotrichea-2,,Morpho,nl_ciliate,ciliate_graz,heterotroph,nano_grazer,,
+Spirotrichea-1,,Morpho,nl_ciliate,ciliate_graz,heterotroph,heterotroph,,
+spirotrichea-2,,Morpho,nl_ciliate,ciliate_graz,heterotroph,heterotroph,,
 spirotrich-3,,Morpho,nl_ciliate,ciliate_graz,mixotrophic,mixotroph,,
-spirotrich-4,,Morpho,nl_ciliate,ciliate_graz,heterotroph,nano_grazer,,
-spirotrich-5,,Morpho,nl_ciliate,ciliate_graz,heterotroph,nano_grazer,,
+spirotrich-4,,Morpho,nl_ciliate,ciliate_graz,heterotroph,heterotroph,,
+spirotrich-5,,Morpho,nl_ciliate,ciliate_graz,heterotroph,heterotroph,,
 spirotrich-6,,Morpho,nl_ciliate,ciliate_graz,mixotrophic,mixotroph,,
 spirotrich-7,,Morpho,nl_ciliate,ciliate_graz,mixotrophic,mixotroph,,
 spirotrich-8,,Morpho,nl_ciliate,ciliate_graz,mixotrophic,mixotroph,,
-spirotrich-9,,Morpho,nl_ciliate,ciliate_graz,heterotroph,nano_grazer,,
-Askenasia,Askensia sp.,Genera,nl_ciliate,ciliate_graz,heterotroph,nano_grazer,,Larink & Westheide (2011)
-Didinium,Didinium spp. ,Genera,nl_ciliate,ciliate_graz,heterotroph,nano_grazer,,Berger (1979); Alekperov et al (2008)
-Tintinnida,Tintinds,Family,lor_ciliate,ciliate_graz,heterotroph,nano_grazer,,Larink & Westheide (2011)
-Codonellidae,Tintinds,Family,lor_ciliate,ciliate_graz,heterotroph,nano_grazer,,Larink & Westheide (2011)
-Eutintinnus,Tintinds,Family,lor_ciliate,ciliate_graz,heterotroph,nano_grazer,,Larink & Westheide (2011)
+spirotrich-9,,Morpho,nl_ciliate,ciliate_graz,heterotroph,heterotroph,,
+Askenasia,Askensia sp.,Genera,nl_ciliate,ciliate_graz,heterotroph,heterotroph,,Larink & Westheide (2011)
+Didinium,Didinium spp. ,Genera,nl_ciliate,ciliate_graz,heterotroph,heterotroph,,Berger (1979); Alekperov et al (2008)
+Tintinnida,Tintinds,Family,lor_ciliate,ciliate_graz,heterotroph,heterotroph,,Larink & Westheide (2011)
+Codonellidae,Tintinds,Family,lor_ciliate,ciliate_graz,heterotroph,heterotroph,,Larink & Westheide (2011)
+Eutintinnus,Tintinds,Family,lor_ciliate,ciliate_graz,heterotroph,heterotroph,,Larink & Westheide (2011)
 Asterionellopsis glacialis,Asterionellopsis glacialis,Species,diatom,pennate_chain,autotrophic,diat_auto,,Horner (2002); Tomas (1997) (1997)
 Bacillaria paxillifera,Bacillaria paxilifera,Species,diatom,pennate_chain,autotrophic,diat_auto,,Horner (2002); Tomas (1997) (1997)
 Cylindrotheca,Cylindrotheca spp.,Genera,diatom,pennate_solo,autotrophic,diat_auto,,Tomas (1997)
