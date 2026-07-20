@@ -1,4 +1,8 @@
 # regression for chla
+#
+# Predictors are raw nutrient concentrations (P, NH4, N, SiOH), not molar
+# ratios - nutrient stoichiometry (N:P, N:Si) is reported separately in
+# fig-02-environ_ts.R rather than used as a regression covariate.
 
 rm(list = ls())
 library(cmdstanr)
@@ -12,19 +16,25 @@ source('./R/utils.R')
 wq <- readRDS('./data/01a-swmp_wq_data.rds')
 chl <- readRDS('./data/01b-size_frac_chl.RDS')
 wind <- readRDS('./data/01c-wind_score.RDS')
+si <- readRDS('./data/01e-silicate.rds')
 
 
-all_data <- chl |> 
-  select(-year,-date) |> 
+all_data <- chl |>
+  select(-year,-date) |>
   left_join(
     wq,
     by = c('yearmo','site'='sampling_site')
-  ) |> 
+  ) |>
   left_join(
-    wind |> 
+    wind |>
       select(yearmo, wind = wind_pca),
     by = 'yearmo',
     relationship = 'many-to-many'
+  ) |>
+  left_join(
+    si |>
+      select(SiOH, sampling_site, yearmo),
+    by = c('yearmo','site'='sampling_site')
   )
 
 all_data$month <- month(all_data$yearmo)
@@ -33,25 +43,26 @@ all_data$month <- month(all_data$yearmo)
 all_data$sin_term <- sin(2*pi*all_data$month/12)
 all_data$cos_term <- cos(2*pi*all_data$month/12)
 
-all_data <- all_data |> 
+all_data <- all_data |>
   pivot_longer(
     cols = c(micro, nano, pico),
     names_to = 'frac',
     values_to = 'ugL_chl'
-  ) |> 
+  ) |>
   filter(!is.na(ugL_chl))
 
 
 resp <- all_data$ugL_chl
 frac <- all_data$frac |> factor(levels = levels(size_factors))
 site <- all_data$site |> factor(levels = levels(site_factors))
-preds <- all_data |> 
-  select(sin_term, cos_term, wind,temp, sal, P, NH4, N)
+preds <- all_data |>
+  select(sin_term, cos_term, wind,temp, sal, P, NH4, N, SiOH)
 
 # # log-transform nutrient terms
 preds$P <- log(preds$P + 1e-5)
 preds$NH4 <- log(preds$NH4 + 1e-5)
 preds$N <- log(preds$N + 1e-5)
+preds$SiOH <- log(preds$SiOH + 1e-5)
 
 pred_scaled <- scale(preds[,-c(1,2,3)]) # don't scale seasonal or wind (already normalized)
 
@@ -74,7 +85,7 @@ chl_data <- list(
 init_list <- list(
   sigma_f = rep(1, chl_data$K_frac),
   mu = matrix(0, nrow = chl_data$K_frac, ncol = chl_data$K_x),
-  sigma_beta = matrix(1, nrow = chl_data$K_frac, ncol = chl_data$K_x), 
+  sigma_beta = matrix(1, nrow = chl_data$K_frac, ncol = chl_data$K_x),
   beta = array(0, dim = c(chl_data$K_frac, chl_data$K_site, chl_data$K_x))
 )
 
@@ -99,11 +110,11 @@ fit <- chl_model$sample(
 # model check
 dev <- fit$draws(c("dev_obs",'dev_sim'), format = 'df')
 p_val <- dev$dev_obs > dev$dev_sim
-cat('\n', paste0('Bayes pvalue: ', mean(p_val)), '\n') 
+cat('\n', paste0('Bayes pvalue: ', mean(p_val)), '\n')
 
-cat('\n', 'Rhat summary:','\n',fit$summary()$rhat |> summary(), '\n') 
+cat('\n', 'Rhat summary:','\n',fit$summary()$rhat |> summary(), '\n')
 
-betas <- fit$draws('beta') 
+betas <- fit$draws('beta')
 
 beta_arr <- array(as.vector(betas), dim = c(niter/nthin * nchain, chl_data$K_frac, chl_data$K_site, chl_data$K_x))
 

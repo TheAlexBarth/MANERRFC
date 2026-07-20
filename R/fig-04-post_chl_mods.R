@@ -42,7 +42,8 @@ clean_names <- c(
   sal = 'Salinity',
   P = 'PO4',
   NH4 = 'NH4',
-  N = 'NO23'
+  N = 'NO23',
+  SiOH = 'SiO4'
 )
 
 beta_plot <- function(size_frac) {

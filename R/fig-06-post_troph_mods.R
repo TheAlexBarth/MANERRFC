@@ -39,6 +39,7 @@ clean_names <- c(
   P = 'PO4',
   NH4 = 'NH4',
   N = 'NO23',
+  SiOH = 'SiO4',
   micro = 'Micro',
   nano = 'Nano',
   pico = 'Pico'

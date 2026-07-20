@@ -2,6 +2,9 @@ rm(list = ls())
 
 library(sf)
 library(ggplot2)
+library(ggmap)
+library(ggspatial)
+library(rnaturalearth)
 source('./R/utils.R')
 
 swmp_sites <- read.csv('./data/swmp_station_meta.csv')
@@ -31,15 +34,13 @@ wind <- st_as_sf(wind, coords = c('lon','lat')) |>
 swmp_sites$station_abbv <- toupper(swmp_sites$station_abbv)
 
 ggplot() +
-  geom_sf(
-    data = ma,
-    fill = "#b8eaf1"
-  ) +
+  annotation_map_tile(type = "osm", zoom = 10) +  # satellite imagery
   geom_sf(
     data = swmp_sites,
     aes(
       color = station_abbv
-    )
+    ),
+    size = 5
   )+
   geom_sf(
     data = wind,
@@ -56,3 +57,21 @@ ggplot() +
 
 
 ggsave('./output/fig01-map.pdf', width = 85, height = 85, units = 'mm', dpi = 600)
+
+
+us_states <- ne_states(country = "United States of America", returnclass = "sf")
+texas <- us_states[us_states$name == "Texas", ]
+
+ma_bbox <- st_bbox(ma) |> st_as_sfc()
+
+ggplot() +
+  geom_sf(data = texas, fill = "white", color = "black") +
+  geom_sf(data = ma_bbox, fill = NA, color = "red", linewidth = 1) +
+  theme_void() +
+  theme(
+    axis.title = element_blank(),
+    axis.text = element_blank(),
+    axis.ticks = element_blank()
+  )
+
+ggsave('./output/fig01b-texas.pdf', width = 85, height = 85, units = 'mm', dpi = 600)

@@ -1,11 +1,29 @@
 rm(list = ls())
+library(ggplot2)
+library(ggpubr)
+library(dplyr)
+library(lubridate)
 source('./R/utils.R')
+
+# NOTE: the "non-chlorophyll" predictor block for autotrophs (intercept,
+# wind, temp, sal, P, NH4, N, SiOH - i.e. everything except chl) is sized
+# dynamically via `1:(ncol(post$preds) - 3)` rather than hardcoded, since
+# stan/count_mod.stan always puts chl (micro/nano/pico) in the final 3
+# columns regardless of how many nutrient predictors precede them.
+#
+# NOTE: biomass is plotted via `median` rather than `mean`. mean_bmass is
+# back-transformed from a log-normal (exp(eta_r + sigma_r^2/2)), which is
+# extremely sensitive to the tail of sigma_r - a handful of MCMC draws with
+# large sigma_r can blow the arithmetic mean up by orders of magnitude while
+# barely nudging the 95% quantile ribbon. The median is robust to that and
+# stays consistent with the ribbon (matches fig-06's `mid = median(est)`).
 post <- readRDS("./data/04-post_micro.RDS")
 
 conc_raw <- readRDS("./data/02-full_merged.rds")$conc
 regime <- readRDS('./data/01d-river_regime.rds')
 post$alpha |> dim()
 
+nonchl_cols <- 1:(ncol(post$preds) - 3)
 
 # region CALCULATE Lambda exp
 
@@ -22,7 +40,7 @@ for(troph in troph_factors) {
 
     data_idx <- which(conc_raw$functional_role == troph & conc_raw$sample_site == site)
     if(troph_idx < 3) {
-      lambda <- as.matrix(post$preds[data_idx,1:7]) %*% t(post$alpha[,troph_idx, site_idx, 1:7]) # remove chl for autotrophs
+      lambda <- as.matrix(post$preds[data_idx,nonchl_cols]) %*% t(post$alpha[,troph_idx, site_idx, nonchl_cols]) # remove chl for autotrophs
     } else {
       lambda <- as.matrix(post$preds[data_idx,]) %*% t(post$alpha[,troph_idx, site_idx, ]) # num per mL
     }
@@ -53,7 +71,7 @@ all_plotter <- function(psite) {
     geom_line(
       aes(
         x = date,
-        y = mean,
+        y = median,
         color = troph
       )
     )+  
@@ -118,7 +136,7 @@ mixo_plotter <- function(psite) {
     geom_line(
       aes(
         x = date,
-        y = mean,
+        y = median,
         color = troph
       )
     )+  

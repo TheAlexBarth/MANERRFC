@@ -76,6 +76,35 @@ troph_cols <- c(
 # endregion -----------------------
 
 ################
+# MARK: Nutrient molar conversion
+################
+# region \- mg/L -> uM + N:P, N:Si ratios -----------------
+#' atomic weights (g/mol) for converting CDMO mg/L nutrient values to uM
+atomic_weight_N <- 14.007
+atomic_weight_P <- 30.974
+atomic_weight_Si <- 28.086
+
+#' Add molar (uM) nutrient concentrations and N:P / N:Si ratios to a
+#' site x yearmo nutrient data frame.
+#'
+#' @param df data frame with columns N (NO23, mg/L as N), NH4 (mg/L as N),
+#'   P (mg/L as P), SiOH (mg/L as Si)
+compute_molar_ratios <- function(df) {
+  df$totalN <- df$N + df$NH4
+  df$N_uM <- df$totalN / atomic_weight_N * 1000
+  df$P_uM <- df$P / atomic_weight_P * 1000
+  df$Si_uM <- df$SiOH / atomic_weight_Si * 1000
+
+  df$NP_ratio <- df$N_uM / df$P_uM
+  df$NSi_ratio <- df$N_uM / df$Si_uM
+  df$NP_ratio[is.infinite(df$NP_ratio)] <- NA
+  df$NSi_ratio[is.infinite(df$NSi_ratio)] <- NA
+
+  return(df)
+}
+# endregion -----------------------
+
+################
 # MARK: Posterior Tools
 ################
 # # region \- prediction data 

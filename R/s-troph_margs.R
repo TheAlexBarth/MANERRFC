@@ -103,7 +103,7 @@ for(var in names(post$preds[,-1])) {
         length.out = 100
       )
 
-      if(var %in% c('N',"NH4","P")) {
+      if(var %in% c('N',"NH4","P","SiOH")) {
         sim_scale <- scale(
           log(sim_range +1e-5), 
           center = mean(log(raw$conc[[var]]+1e-5)), 
@@ -119,9 +119,7 @@ for(var in names(post$preds[,-1])) {
       lambda_pred <- post$alpha[,troph_idx, site_idx, 1] +
           as.matrix(sim_scale) %*% post$alpha[, troph_idx, site_idx, var_idx]
 
-      pconc <- t(exp(lambda_pred)*1e6) * rep(mean_bmass/1e9, each = nrow(lambda_pred))
-
-      marg_list[[var]][[troph]][[site]] <- (exp(lambda_pred)*1e6) |> 
+      marg_list[[var]][[troph]][[site]] <- (exp(lambda_pred)*1e6) |>
         t() |> 
         summarize_pred()
       marg_list[[var]][[troph]][[site]][[var]] <- sim_range
