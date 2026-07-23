@@ -9,10 +9,9 @@ source('./R/utils.R')
 
 etx = readRDS('./data/00-ecotaxa_full.rds')
 
-wq <- readRDS('./data/01a-swmp_wq_data.rds')
+wq <- readRDS('./data/01a-swmp_wq_data.rds')  # SiOH now included (was pipe-01e)
 chl <- readRDS('./data/01b-size_frac_chl.RDS')
 wind <- readRDS('./data/01c-wind_score.RDS')
-si <- readRDS('./data/01e-silicate.rds')
 
 # region \- merge conc ----------
 
@@ -29,7 +28,7 @@ troph_conc <- etx$conc |>
   ungroup() |>
   left_join(
     wq |>
-      select(P, NH4, N, CHLA_N, temp, sal, sampling_site, yearmo),
+      select(P, NH4, N, SiOH, CHLA_N, temp, sal, sampling_site, yearmo),
     by = c('sample_site' = 'sampling_site','yearmo')
   ) |>
   left_join(
@@ -42,11 +41,6 @@ troph_conc <- etx$conc |>
       select(wind_pca, yearmo),
      by = c('yearmo'),
      relationship = 'many-to-many'
-  ) |>
-  left_join(
-    si |>
-      select(SiOH, sampling_site, yearmo),
-    by = c('sample_site' = 'sampling_site','yearmo')
   )
 
 troph_conc$sample_site <- factor(troph_conc$sample_site, levels = levels(site_factors))

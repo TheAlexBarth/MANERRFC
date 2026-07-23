@@ -13,10 +13,9 @@ library(tidyr)
 source('./R/utils.R')
 
 
-wq <- readRDS('./data/01a-swmp_wq_data.rds')
+wq <- readRDS('./data/01a-swmp_wq_data.rds')  # SiOH now included (was pipe-01e)
 chl <- readRDS('./data/01b-size_frac_chl.RDS')
 wind <- readRDS('./data/01c-wind_score.RDS')
-si <- readRDS('./data/01e-silicate.rds')
 
 
 all_data <- chl |>
@@ -30,11 +29,6 @@ all_data <- chl |>
       select(yearmo, wind = wind_pca),
     by = 'yearmo',
     relationship = 'many-to-many'
-  ) |>
-  left_join(
-    si |>
-      select(SiOH, sampling_site, yearmo),
-    by = c('yearmo','site'='sampling_site')
   )
 
 all_data$month <- month(all_data$yearmo)

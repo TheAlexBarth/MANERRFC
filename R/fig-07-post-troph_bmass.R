@@ -63,134 +63,92 @@ for(troph in troph_factors) {
 
 all_troph <- EcotaxaTools::list_to_tib(troph_list, 'troph')
 
-all_plotter <- function(psite) {
-  p = ggplot(
-    all_troph |> 
-      filter(site == psite, troph != 'mixotroph')
-  ) +
-    geom_line(
-      aes(
-        x = date,
-        y = median,
-        color = troph
-      )
-    )+  
+# factor role so the shared legend shows all four roles (drop = FALSE), in order
+# and with fully written-out names
+all_troph$troph <- factor(all_troph$troph, levels = levels(troph_factors))
+
+# regime drawn as contiguous wet/dry run-rectangles below y = 0 (see
+# regime_run_bands() in utils.R) rather than a dense daily rug - continuous
+# coloured band, no data overlap, tiny file size.
+regime_runs <- regime_run_bands(regime)
+
+# shared panel builder. `grp` selects the multi-group community (all roles except
+# mixotroph) or the mixotroph column; the mixotroph column drops its y-title and
+# subtitle since it shares each row's site with the community panel on its left.
+# fill is a single combined scale (roles + wet/dry) so the base regime band and
+# the biomass ribbons can coexist; the role legend is supplied separately.
+troph_bmass_plot <- function(psite, grp = c('community', 'mixo')) {
+  grp <- match.arg(grp)
+  sub_data <- if (grp == 'community') {
+    all_troph |> filter(site == psite, troph != 'mixotroph')
+  } else {
+    all_troph |> filter(site == psite, troph == 'mixotroph')
+  }
+
+  # regime band is drawn as a strip BELOW y = 0 so it never overlaps the biomass
+  # data (which is >= 0); depth is a small fraction of this panel's range, and
+  # the y-axis lower limit is extended by the same amount to make room for it
+  band_depth <- 0.06 * max(sub_data$high.95, na.rm = TRUE)
+  if (!is.finite(band_depth) || band_depth <= 0) band_depth <- 1
+  runs <- transform(regime_runs, ymin = -band_depth, ymax = 0)
+
+  ggplot(sub_data) +
+    geom_line(aes(x = date, y = median, color = troph)) +
     geom_ribbon(
-      aes(
-        x = date,
-        ymin = low.95,
-        ymax = high.95,
-        fill = troph
-      ),
+      aes(x = date, ymin = low.95, ymax = high.95, fill = troph),
       alpha = 0.5
-    )+
-    geom_rug(
-      data = regime |> 
-        filter(year(yearmo) %in% c(2014:2021)),
-      aes(
-         x = Date,
-         color = regime
-      )
-    )+
-    labs(x = "", y = 'Biomass [mgC/m3]', fill = "", subtitle = psite)+
-    guides(color = 'none')+
-    scale_fill_manual(values = troph_cols)+
-    scale_color_manual(values = c(troph_cols, regime_cols)) +
+    ) +
+    geom_rect(
+      data = runs,
+      aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = regime),
+      inherit.aes = FALSE
+    ) +
+    labs(
+      x = "",
+      y = if (grp == 'community') expression('Biomass [mg C m'^-3 * ']') else "",
+      subtitle = if (grp == 'community') site_labels[[psite]] else ""
+    ) +
+    guides(color = 'none', fill = 'none') +
+    scale_fill_manual(values = c(troph_cols, regime_cols), drop = FALSE) +
+    scale_color_manual(values = troph_cols) +
+    scale_y_continuous(expand = expansion(mult = c(0, 0.05))) +
+    coord_cartesian(ylim = c(-band_depth, NA)) +
     theme_pubclean(base_size = 8)
-  return(p)
 }
 
+# shared role legend, built from all four roles (so every role - including
+# Mixotroph - gets a colour swatch) and flattened onto a single row
+shared_legend <- get_legend(
+  ggplot(all_troph) +
+    geom_ribbon(aes(x = date, ymin = low.95, ymax = high.95, fill = troph)) +
+    scale_fill_manual(values = troph_cols, labels = troph_labels, drop = FALSE) +
+    labs(fill = "") +
+    guides(fill = guide_legend(nrow = 1)) +
+    theme_pubclean(base_size = 8) +
+    theme(legend.position = 'bottom', legend.text = element_text(size = 7))
+)
 
-cw_plot <- all_plotter('CW')
-ce_plot <- all_plotter("CE")
-ab_plot <- all_plotter("AB")
-mb_plot <- all_plotter('MB')
-sc_plot <- all_plotter("SC")
-
+# one complete double-column figure: left column = multi-group community
+# (diatoms / dinoflagellates / heterotrophs), right column = mixotrophs, one row
+# per site. Flat 2-column ggarrange with the shared role legend at the bottom.
 full_plot <- ggarrange(
-  cw_plot,
-  ce_plot,
-  ab_plot,
-  mb_plot,
-  sc_plot,
-  ncol = 1,
-  align = 'v',
-  common.legend = T,
+  troph_bmass_plot('CW', 'community'), troph_bmass_plot('CW', 'mixo'),
+  troph_bmass_plot('CE', 'community'), troph_bmass_plot('CE', 'mixo'),
+  troph_bmass_plot('AB', 'community'), troph_bmass_plot('AB', 'mixo'),
+  troph_bmass_plot('MB', 'community'), troph_bmass_plot('MB', 'mixo'),
+  troph_bmass_plot('SC', 'community'), troph_bmass_plot('SC', 'mixo'),
+  ncol = 2, nrow = 5,
+  align = 'hv',
+  common.legend = TRUE,
+  legend = 'bottom',
+  legend.grob = shared_legend,
   labels = LETTERS
 )
 
 ggsave(
   './output/fig07-post_pred_plots.pdf',
   full_plot,
-  height = 270, width = 170, units = 'mm',
-  dpi= 600
+  height = 215, width = 178, units = 'mm',
+  dpi = 600
 )
-
-
-# region Mixoplot -----------------------
-mixo_plotter <- function(psite) {
-  p = ggplot(
-    all_troph |> 
-      filter(site == psite, troph == 'mixotroph')
-  ) +
-    geom_line(
-      aes(
-        x = date,
-        y = median,
-        color = troph
-      )
-    )+  
-    geom_ribbon(
-      aes(
-        x = date,
-        ymin = low.95,
-        ymax = high.95,
-        fill = troph
-      ),
-      alpha = 0.5
-    )+
-    geom_rug(
-      data = regime |> 
-        filter(year(yearmo) %in% c(2014:2021)),
-      aes(
-         x = Date,
-         color = regime
-      )
-    )+
-    labs(x = "", y = 'Biomass [mgC/m3]', fill = "", subtitle = psite)+
-    guides(color = 'none')+
-    scale_fill_manual(values = troph_cols)+
-    scale_color_manual(values = c(troph_cols, regime_cols)) +
-    theme_pubclean(base_size = 8)
-  return(p)
-}
-
-
-cw_mplot <- mixo_plotter('CW')
-ce_mplot <- mixo_plotter("CE")
-ab_mplot <- mixo_plotter("AB")
-mb_mplot <- mixo_plotter('MB')
-sc_mplot <- mixo_plotter("SC")
-
-full_mplot <- ggarrange(
-  cw_mplot,
-  ce_mplot,
-  ab_mplot,
-  mb_mplot,
-  sc_mplot,
-  ncol = 1,
-  align = 'v',
-  common.legend = T,
-  labels = LETTERS
-)
-
-ggsave(
-  './output/fig07b-post_pred_plots.pdf',
-  full_mplot,
-  height = 270, width = 170, units = 'mm',
-  dpi= 600
-)
-
-
-# endregion -----------------------
 

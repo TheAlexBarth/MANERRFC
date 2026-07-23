@@ -26,7 +26,7 @@ locally.
 
 - `pipe-##[letter]-*.R` — import and reformat one external raw data source, save an RDS/RDS-like file into
   `data/` named with the same numeric prefix (e.g. `pipe-01a-import_swmp_environ.R` → `data/01a-swmp_wq_data.rds`).
-- `##-*.R` (no prefix word, e.g. `03-gen_taxa_pred-mod.R`, `04-troph_regression.R`) — analysis/model-fitting
+- `##-*.R` (no prefix word, e.g. `03-size_frac_chla_reg.R`, `04-troph_regression.R`) — analysis/model-fitting
   scripts. These load merged data, build `cmdstanr` models from `stan/*.stan`, and fit them.
 - `fig-##-*.R` — generate a manuscript figure, written to `output/` as a PDF.
 - `s-*.R` — supplementary/summary scripts and plots, also written to `output/`.
@@ -40,16 +40,16 @@ locally.
 
 1. `pipe-00-import_etx.R` — reads raw Ecotaxa plankton-imaging data and `data/xx-taxo_map.csv` →
    `data/00-ecotaxa_full.rds`.
-2. `pipe-01a` (SWMP water quality), `pipe-01b` (size-fractionated chlorophyll), `pipe-01c` (wind, scraped
-   from NOAA NDBC), `pipe-01d` (river regime), `pipe-01e` (silicate, SiOH) — each independent, →
-   `data/01[a-e]-*.rds`.
-3. `pipe-02-data_merger.R` — joins `00` + `01a/b/c/e` outputs into `data/02-full_merged.rds` (a list with
+2. `pipe-01a` (SWMP water quality, incl. silicate/SiOH), `pipe-01b` (size-fractionated chlorophyll),
+   `pipe-01c` (wind, scraped from NOAA NDBC), `pipe-01d` (river regime) — each independent, →
+   `data/01[a-d]-*.rds`.
+3. `pipe-02-data_merger.R` — joins `00` + `01a/b/c` outputs into `data/02-full_merged.rds` (a list with
    `conc` and `indv` tibbles), which is the primary input for downstream analysis/model scripts.
-4. `03-*` / `04-*` — fit Stan models (via `R/utils-mod_making.R::fit_mod()` and friends) → save posterior
+4. `03-*` / `04-*` — build `cmdstanr` models from `stan/*.stan` and fit them → save posterior
    output to `data/03-post_chl.RDS`, `data/04-post_micro.RDS`, etc.
 5. `fig-*` / `s-*` — consume the merged and posterior data to produce figures/tables in `output/`.
 
-**Important:** `pipe-00` and `pipe-01a`/`pipe-01e` (and `fig-01-map.R`'s basemap layer) read raw source
+**Important:** `pipe-00` and `pipe-01a` (and `fig-01-map.R`'s basemap layer) read raw source
 files from a hardcoded local Box Cloud Storage path
 (`~/Library/CloudStorage/Box-Box/TGCRC Plankton Food Webs/Data/...`) that only exists on the author's
 machine — these scripts explicitly note "will need local adjustment" and cannot be rerun without that
@@ -68,9 +68,8 @@ scripts.
 
 ## Modeling code structure
 
-- `R/utils-mod_making.R` — data-prep helpers (`prep_component_data()`, `prep_component_data_sites()`) that
-  build model-ready tibbles from the `etx` merged-data object, plus `fit_mod()` which assembles the
-  `cmdstanr` data list and calls `$sample()`.
+- `03-size_frac_chla_reg.R` / `04-troph_regression.R` — assemble the `cmdstanr` data list inline (design
+  matrix, group indices, inits) and call `$sample()` directly; there is no shared model-fitting helper file.
 - `R/utils-posterior_specific.R` — posterior-processing/plotting helpers built on top of fitted draws:
   `post_predict()` (evaluate a formula over posterior draws + new predictor data), `summarize_pred()`
   (draws matrix → mean/median/HDI or quantile interval summary), `post_arr_to_df()`, `make_marg_data()` /

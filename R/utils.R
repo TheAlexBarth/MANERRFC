@@ -61,6 +61,22 @@ size_cols <- c(
   `micro` = "#296D00"
 )
 
+# full site names (from data/swmp_station_meta.csv) and capitalized size classes,
+# for figure labels / legends. Names match site_cols / size_cols keys.
+site_labels <- c(
+  `CW` = 'Copano Bay West',
+  `CE` = 'Copano Bay East',
+  `AB` = 'Aransas Bay',
+  `MB` = 'Mesquite Bay',
+  `SC` = 'Ship Channel'
+)
+
+size_labels <- c(
+  `pico` = 'Pico',
+  `nano` = 'Nano',
+  `micro` = 'Micro'
+)
+
 troph_factors <- factor(
   c("diat_auto",'dino_auto','mixotroph','heterotroph'),
   levels = c("diat_auto",'dino_auto','mixotroph','heterotroph')
@@ -72,6 +88,33 @@ troph_cols <- c(
   `mixotroph` = '#88CCEE',
   `heterotroph` = '#DDCC77'
 )
+
+# fully written-out functional-role names for figure legends. Names match
+# troph_cols / troph_factors keys.
+troph_labels <- c(
+  `diat_auto` = 'Autotrophic Diatoms',
+  `dino_auto` = 'Autotrophic Dinoflagellates',
+  `mixotroph` = 'Mixotrophs',
+  `heterotroph` = 'Heterotrophs'
+)
+
+#' Contiguous wet/dry regime runs, for drawing a compact regime band in place of
+#' a dense daily geom_rug (which emits thousands of vector segments and bloats
+#' PDF file size). Collapses the daily record into one row per run so the band
+#' can be drawn as a handful of geom_rect boxes. Draw the returned runs as a
+#' strip BELOW y = 0 so it never overlaps the data.
+regime_run_bands <- function(regime_df, years = 2014:2021) {
+  d <- regime_df[lubridate::year(regime_df$Date) %in% years, ]
+  d <- d[order(d$Date), ]
+  r <- rle(as.character(d$regime))
+  end <- cumsum(r$lengths)
+  start <- c(1, head(end, -1) + 1)
+  data.frame(
+    xmin = d$Date[start],
+    xmax = d$Date[end],
+    regime = r$values
+  )
+}
 
 # endregion -----------------------
 
