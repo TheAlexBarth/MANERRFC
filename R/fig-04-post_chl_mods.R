@@ -42,7 +42,8 @@ clean_names <- c(
   sal = 'Salinity',
   P = 'PO4',
   NH4 = 'NH4',
-  N = 'NO23'
+  N = 'NO23',
+  SiOH = 'SiO4'
 )
 
 beta_plot <- function(size_frac) {
@@ -65,17 +66,21 @@ beta_plot <- function(size_frac) {
       position = position_dodge(width = 0.5),
       linewidth = 0.3
     ) +
-    scale_color_manual(values = site_cols)+
+    scale_color_manual(values = site_cols)+  # abbreviated station names in legend
     geom_hline(aes(yintercept = 0), linewidth = 0.3)+
     labs(
       color = "",
       x = "",
       y = "Slope",
-      subtitle = size_frac
+      subtitle = size_labels[[size_frac]]
     )+
-    theme_pubclean(base_size = 8) + 
+    guides(color = guide_legend(nrow = 1, override.aes = list(size = 1.5)))+
+    theme_pubclean(base_size = 8) +
     theme(
       axis.title.y = element_text(margin = margin(r = 4)),
+      axis.text.x = element_text(angle = 45, hjust = 1, size = 6.5),
+      legend.text = element_text(size = 6.5),
+      legend.key.size = unit(9, 'pt'),
       plot.margin = margin(2, 2, 2, 2)
     ) +
     scale_y_continuous(limits = c(-2.12,2))
@@ -90,13 +95,19 @@ micro = beta_plot('micro')
 # endregion -----------------------
 
 
+# only the bottom (pico) panel shows the x-axis; fully blank it on the upper two
+# (not just transparent text) so the angled labels don't reserve empty space and
+# squeeze the panels
+hide_x <- theme(axis.text.x = element_blank(), axis.ticks.x = element_blank())
+
 full_plot <- ggarrange(
-  micro + theme(axis.text.x = element_text(color = 'transparent')), 
-  nano + theme(axis.text.x = element_text(color = 'transparent')), 
+  micro + hide_x,
+  nano + hide_x,
   pico,
   ncol = 1, align = 'v',
   common.legend = TRUE,
   legend = 'bottom',
   labels = LETTERS
 )
-ggsave('./output/fig04-chl_effects.pdf',plot = full_plot, width = 85, height = 120, units = 'mm')
+ggsave('./output/fig04-chl_effects.pdf', plot = full_plot,
+  width = 85, height = 130, units = 'mm', dpi = 600)

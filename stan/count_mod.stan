@@ -61,9 +61,9 @@ generated quantities {
  
  
     for (i in 1:N_obs) {
-        real log_lambda = dot_product(W[i,:K_x-4], to_vector(alpha[role[i], site[i],:K_x-4])) +
+        real log_lambda = dot_product(W[i,1:(K_x-3)], to_vector(alpha[role[i], site[i],1:(K_x-3)])) +
                           log(img_vol[i]) +
-                          incld_chl[i] * dot_product(W[i,K_x-3:], to_vector(alpha[role[i], site[i],K_x-3:]));
+                          incld_chl[i] * dot_product(W[i,(K_x-2):K_x], to_vector(alpha[role[i], site[i],(K_x-2):K_x]));
         
         // Sample posterior predictive
         int n_sim = neg_binomial_2_rng(exp(log_lambda), gamma[role[i]]);

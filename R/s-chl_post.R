@@ -205,7 +205,7 @@ for(var in names(post_chl$data$X_scaled)[-c(1:3)]) {
         max(sub_data[[var]]),
         length.out = 100
       )
-      if(var %in% c('N',"NH4","P")) {
+      if(var %in% c('N',"NH4","P","SiOH")) {
         sim_scale <- scale(
           log(sim_range +1e-5), 
           center = mean(log(post_chl$data$all_data[[var]]+1e-5)), 

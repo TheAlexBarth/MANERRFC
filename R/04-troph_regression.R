@@ -26,16 +26,20 @@ conc$month <- conc$yearmo |> month()
 #     micro, nano, pico
 #   )
 
-preds <- conc |> 
+# SiOH inserted before micro/nano/pico - those three must stay last, since
+# stan/count_mod.stan slices the design matrix assuming chlorophyll size
+# fractions are the final K_x-3:K_x columns (only applied when incld_chl).
+preds <- conc |>
   select(
     wind_pca,
-    temp, sal, P, NH4, N,
+    temp, sal, P, NH4, N, SiOH,
     micro, nano, pico
   )
 
 preds$P <- log(preds$P + 1e-5)
 preds$NH4 <- log(preds$NH4 + 1e-5)
 preds$N <- log(preds$N + 1e-5)
+preds$SiOH <- log(preds$SiOH + 1e-5)
 
 # pred_scaled <- scale(preds[,-c(1,2,3)]) # don't scale seasonal or wind (already normalized)
 pred_scaled <- scale(preds[,-c(1)]) # don't scale seasonal or wind (already normalized)

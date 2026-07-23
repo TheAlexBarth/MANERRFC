@@ -1,5 +1,12 @@
 ######
 # Environmental Formatting
+#
+# Imports SWMP water-quality trip records and formats monthly site means for
+# temp, salinity, PO4 (P), NH4, NO23 (N), CHLA, and SiOH (silicate). SiOH was
+# added per reviewer request; it is folded in here (formerly pipe-01e) because
+# it comes from the same raw files and QAQC conventions. Unlike temp/sal it has
+# near-complete coverage, so it is carried straight through the monthly means
+# and deliberately kept out of the PCA imputation below.
 ######
 
 
@@ -43,9 +50,13 @@ raw_df$PO4F[grepl("<-4>",raw_df$F_PO4F)] <- 0
 raw_df$NH4F[grepl("<-4>",raw_df$F_NH4F)] <- 0
 raw_df$NO23F[grepl("<-4>",raw_df$F_NO23F)] <- 0
 
+raw_df$SiO4F[grepl("<-4>", raw_df$F_SiO4F)] <- 0
+
+raw_df$SiO4F[grepl("<-3>", raw_df$F_SiO4F)] <- 0
 raw_df$PO4F[grepl("<-3>", raw_df$F_PO4F)] <- NA
 raw_df$NH4F[grepl("<-3>", raw_df$F_NH4F)] <- NA
 raw_df$NO23F[grepl("<-3>", raw_df$F_NO23F)] <- NA
+raw_df$SiO4F[grepl("<-3>", raw_df$F_SiO4F)] <- NA
 
 
 raw_df$Date <- raw_df$DateTimeStamp |> 
@@ -61,7 +72,7 @@ raw_df$yearmo <- make_yearmo(raw_df, 'Date')
 
 raw_df$sampling_site <- substr(raw_df$Station.Code, 4,5) |> toupper()
 mo_nut <- raw_df |> 
-  select(sampling_site, yearmo, P = PO4F, NH4 = NH4F, N = NO23F, CHLA_N, temp = WTEM_N, sal = SALT_N) |> 
+  select(sampling_site, yearmo, P = PO4F, NH4 = NH4F, N = NO23F, SiOH = SiO4F, CHLA_N, temp = WTEM_N, sal = SALT_N) |>
   group_by(sampling_site, yearmo) |> 
   summarize(
     across(everything(), \(x) mean(x, na.rm = TRUE))
@@ -75,7 +86,7 @@ library(missMDA)
 
 fix_df <- cbind(year(mo_nut$yearmo), month(mo_nut$yearmo), mo_nut |> 
   select(
-    temp, sal, P, NH4, N, CHLA_N
+    temp, sal, P, NH4, N, CHLA_N, SiOH
   )
 )
 

@@ -9,7 +9,7 @@ source('./R/utils.R')
 
 etx = readRDS('./data/00-ecotaxa_full.rds')
 
-wq <- readRDS('./data/01a-swmp_wq_data.rds')
+wq <- readRDS('./data/01a-swmp_wq_data.rds')  # SiOH now included (was pipe-01e)
 chl <- readRDS('./data/01b-size_frac_chl.RDS')
 wind <- readRDS('./data/01c-wind_score.RDS')
 
@@ -19,25 +19,25 @@ wind <- readRDS('./data/01c-wind_score.RDS')
 
 #attach variates to each concentration. Start with All
 
-troph_conc <- etx$conc |> 
-  group_by(functional_role, sample_site, yearmo, id) |> 
+troph_conc <- etx$conc |>
+  group_by(functional_role, sample_site, yearmo, id) |>
   summarize(
     count = sum(count),
     img_vol = unique(img_vol)
-  ) |> 
-  ungroup() |> 
+  ) |>
+  ungroup() |>
   left_join(
-    wq |> 
-      select(P, NH4, N, CHLA_N, temp, sal, sampling_site, yearmo),
+    wq |>
+      select(P, NH4, N, SiOH, CHLA_N, temp, sal, sampling_site, yearmo),
     by = c('sample_site' = 'sampling_site','yearmo')
-  ) |> 
+  ) |>
   left_join(
-    chl |> 
+    chl |>
       select(micro, nano, pico, site, yearmo),
      by = c('sample_site' = 'site','yearmo')
-  ) |> 
+  ) |>
   left_join(
-    wind |> 
+    wind |>
       select(wind_pca, yearmo),
      by = c('yearmo'),
      relationship = 'many-to-many'

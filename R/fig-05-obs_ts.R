@@ -7,6 +7,7 @@ rm(list = ls())
 
 source('./R/utils.R')
 library(ggplot2)
+library(ggpubr)
 library(dplyr)
 library(lubridate)
 
@@ -19,17 +20,23 @@ regime <- readRDS("./data/01d-river_regime.RDS")
 
 # region \- Rel by site ----------------
 
-total_by_site <- etx$conc |> 
-  group_by(functional_role, id, sample_site, yearmo) |> 
+total_by_site <- etx$conc |>
+  group_by(functional_role, id, sample_site, yearmo) |>
   summarize(
     num_L = sum(count) / unique(img_vol)
-  ) |> 
-  ungroup() |> 
-  group_by(functional_role, sample_site, yearmo) |> 
+  ) |>
+  ungroup() |>
+  group_by(functional_role, sample_site, yearmo) |>
   summarize(num_mL = mean(num_L))
 
+# wet/dry regime drawn as a continuous band below y = 0 (contiguous run
+# rectangles, see regime_run_bands() in utils.R) instead of a dense daily rug
+ymax_num <- 1500
+regime_depth <- 0.06 * ymax_num
+regime_runs <- transform(regime_run_bands(regime), ymin = -regime_depth, ymax = 0)
+
 site_group_plot <- function(site) {
-  sub_data <- total_by_site |> 
+  sub_data <- total_by_site |>
     filter(sample_site == site)
   p = ggplot(sub_data) +
     geom_bar(
@@ -39,24 +46,26 @@ site_group_plot <- function(site) {
       ),
       position = 'stack', stat = 'identity'
     ) +
+    geom_rect(data = subset(regime_runs, regime == 'Dry'),
+      aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
+      fill = regime_cols[['Dry']], inherit.aes = FALSE) +
+    geom_rect(data = subset(regime_runs, regime == 'Wet'),
+      aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
+      fill = regime_cols[['Wet']], inherit.aes = FALSE) +
+    scale_fill_manual(values = troph_cols, labels = troph_labels) +
+    scale_y_continuous(expand = expansion(mult = c(0, 0.05)), labels = scales::label_comma())+
+    coord_cartesian(ylim = c(-regime_depth, ymax_num))+
+    guides(fill = guide_legend(nrow = 2))+
     labs(
-      x = "", y= "", fill = "", 
-      subtitle = site
+      x = "", y = expression("Number ["*mL^-1*"]"), fill = "",
+      subtitle = site_labels[[site]]
     )+
-    geom_rug(
-      data = regime |> 
-        filter(year(Date) %in% c(min(year(sub_data$yearmo)):max(year(sub_data$yearmo)))),
-      aes(
-        x = Date,
-        color = regime
-      )
-    )+
-    scale_fill_manual(values = troph_cols) +
-    scale_color_manual(values = regime_cols) +
-    scale_y_continuous(limits = c(0, 1500))+
-    labs(x = "", y = "Number per mL", fill = "")+
-    guides(color = 'none')+
-    theme_minimal()
+    theme_minimal(base_size = 8) +
+    theme(
+      legend.text = element_text(size = 6.5),
+      legend.key.size = unit(9, 'pt'),
+      plot.subtitle = element_text(size = 8)
+    )
 }
 
 
@@ -78,7 +87,7 @@ full_times <- ggarrange(
 )
 
 ggsave('./output/fig05-obs_num_conc.pdf',
-full_times, width = 170, height = 250, units = "mm",
+full_times, width = 89, height = 220, units = "mm",
 dpi = 600
 )
 
